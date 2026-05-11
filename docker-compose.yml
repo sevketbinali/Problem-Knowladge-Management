@@ -27,17 +27,36 @@ services:
       - pkm_network
     restart: unless-stopped
 
-  frontend:
+# Streamlit frontend disabled as per user request to focus on Next.js
+#  frontend:
+#    build:
+#      context: .
+#      dockerfile: Dockerfile.frontend
+#    container_name: pkm_frontend
+#    ports:
+#      - "8501:8501"
+#    environment:
+#      - API_URL=http://api:8000/api/v1
+#    volumes:
+#      - ./src:/app/src
+#    depends_on:
+#      - api
+#    networks:
+#      - pkm_network
+#    restart: unless-stopped
+
+  frontend-next:
     build:
-      context: .
-      dockerfile: Dockerfile.frontend
-    container_name: pkm_frontend
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: pkm_frontend_next
     ports:
-      - "8501:8501"
+      - "3000:3000"
     environment:
-      - API_URL=http://api:8000/api/v1
+      - NEXT_PUBLIC_API_URL=http://api:8000/api/v1
     volumes:
-      - ./src:/app/src
+      - ./frontend:/app
+      - /app/node_modules
     depends_on:
       - api
     networks:
