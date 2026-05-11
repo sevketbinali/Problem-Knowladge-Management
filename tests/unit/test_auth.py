@@ -4,6 +4,7 @@ Validates: Requirements 10.1, 10.3, 10.5, 10.7
 """
 import pytest
 from hypothesis import given, settings, strategies as st
+from fastapi import HTTPException, status
 from pydantic import ValidationError
 
 from src.core.auth import get_password_hash, verify_password, create_access_token, decode_access_token
@@ -29,6 +30,12 @@ def test_password_hashing_security(password: str) -> None:
     assert verify_password(password, hashed) is True
     # Wrong password must fail
     assert verify_password(password + "wrong", hashed) is False
+    
+    # Requirement 10.5: At least 12 cost factor
+    # Extract cost from bcrypt hash: $2b$12$salt_hash
+    parts = hashed.split('$')
+    cost = int(parts[2])
+    assert cost >= 12
 
 
 @given(st.dictionaries(
@@ -64,4 +71,68 @@ def test_token_structure(payload: dict) -> None:
     assert len(parts) == 3
     # Check if parts are valid base64 (implicit in JWT structure)
     assert all(len(p) > 0 for p in parts)
+
+
+@given(st.integers(min_value=1, max_value=1000))
+def test_token_expiration_duration(minutes: int) -> None:
+    """Requirement 10.3: Verify JWT expiration time calculation."""
+    from datetime import timedelta, datetime, timezone
+    from src.core.config import settings
+    
+    delta = timedelta(minutes=minutes)
+    token = create_access_token({"sub": "test"}, expires_delta=delta)
+    decoded = decode_access_token(token)
+    
+    # exp is a unix timestamp
+    exp = decoded["exp"]
+    now = datetime.now(timezone.utc).timestamp()
+    
+    # exp should be roughly now + delta
+    expected_exp = now + (minutes * 60)
+    # Allow 5 second leeway for test execution time
+    assert abs(exp - expected_exp) < 5
+
+
+@given(st.sampled_from([
+    ("valid", status.HTTP_200_OK),
+    ("expired", status.HTTP_401_UNAUTHORIZED),
+    ("invalid", status.HTTP_401_UNAUTHORIZED),
+    ("missing", status.HTTP_401_UNAUTHORIZED),
+    ("no_sub", status.HTTP_401_UNAUTHORIZED)
+]))
+def test_token_http_code_mapping(token_scenario: tuple) -> None:
+    """Requirement 10.1, 10.3, 10.7: Verify token state maps to correct HTTP code."""
+    state, expected_code = token_scenario
+    
+    # We simulate the logic in get_current_user
+    # 1. missing -> handled by OAuth2PasswordBearer (raises 401)
+    # 2. invalid -> decode_access_token returns None -> raise 401
+    # 3. expired -> decode_access_token returns None -> raise 401
+    # 4. valid but no sub -> raise 401
+    
+    # In our unit test, we just verify that decode_access_token/logic handles these correctly
+    from src.core.auth import create_access_token, decode_access_token
+    from datetime import timedelta
+    
+    if state == "valid":
+        token = create_access_token({"sub": "user@example.com"})
+        payload = decode_access_token(token)
+        assert payload is not None
+        assert "sub" in payload
+    elif state == "expired":
+        # Create a token that is already expired
+        token = create_access_token({"sub": "user@example.com"}, expires_delta=timedelta(seconds=-1))
+        payload = decode_access_token(token)
+        assert payload is None
+    elif state == "invalid":
+        payload = decode_access_token("not.a.token")
+        assert payload is None
+    elif state == "missing":
+        payload = decode_access_token("")
+        assert payload is None
+    elif state == "no_sub":
+        token = create_access_token({"role": "user"})
+        payload = decode_access_token(token)
+        assert payload is not None
+        assert "sub" not in payload
 

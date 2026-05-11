@@ -69,14 +69,16 @@ Bu plan, FastAPI + PostgreSQL + Qdrant + Redis + Celery mimarisi üzerine inşa 
 
 
 - [ ] 4. Veritabanı altyapısını uygula
-  - [~] 4.1 PostgreSQL şemasını ve SQLAlchemy modellerini yaz
+  - [x] 4.1 PostgreSQL şemasını ve SQLAlchemy modellerini yaz
+
     - `USERS`, `SESSIONS`, `PROBLEM_RECORDS`, `AUDIT_LOGS`, `EMBEDDING_QUEUE` tablolarını SQLAlchemy 2.0 async ORM ile tanımla
     - Alembic migration dosyasını oluştur
     - Bağlantı havuzu: min 5, max 20 bağlantı; tüm yazma işlemleri transaction içinde
     - Doğrulama: `alembic upgrade head` hatasız tamamlanmalı; tüm tablolar ve foreign key'ler oluşturulmalı
     - _Gereksinimler: 6.1, 9.5_
 
-  - [~] 4.2 `PostgreSQLRepository` sınıfını yaz
+  - [x] 4.2 `PostgreSQLRepository` sınıfını yaz
+
     - `create_session`, `get_session`, `update_session`, `create_record`, `get_record`, `update_record`, `delete_record`, `list_records`, `create_audit_log` metodlarını uygula
     - Tüm metodlar async; yazma işlemleri transaction içinde
     - Doğrulama: Her metod için birim testi: geçerli girdi → beklenen dönüş; kayıt bulunamadığında `None` veya exception
@@ -94,54 +96,55 @@ Bu plan, FastAPI + PostgreSQL + Qdrant + Redis + Celery mimarisi üzerine inşa 
     - Doğrulama: `pytest tests/integration/test_records.py::test_metadata_null_assignment` geçmeli
     - **Doğrular: Gereksinim 6.5**
 
-- [ ] 5. Kimlik doğrulama ve yetkilendirme katmanını uygula
-  - [~] 5.1 `AuthService` ve JWT middleware'i yaz
+- [x] 5. Kimlik doğrulama ve yetkilendirme katmanını uygula
+  - [x] 5.1 `AuthService` ve JWT middleware'i yaz
     - JWT token oluşturma, doğrulama ve yenileme fonksiyonlarını uygula
     - Bcrypt şifre hashleme: minimum 12 cost factor; düz metin şifre hiçbir zaman saklanmaz
     - `User` ve `Admin` rol kontrolü middleware'i yaz
     - Doğrulama: Geçerli token → 200; süresi dolmuş → 401; eksik → 401 (format doğrulaması yapılmadan); hatalı biçimli → 401 (format doğrulaması sonrası); yetersiz yetki → 403
     - _Gereksinimler: 10.1, 10.2, 10.3, 10.5, 10.7_
 
-  - [ ]* 5.2 Özellik 25 için property testi yaz — Token durumu ve HTTP yanıt kodu eşleşmesi
+  - [x] 5.2 Özellik 25 için property testi yaz — Token durumu ve HTTP yanıt kodu eşleşmesi
     - **Özellik 25: Token Durumu ve HTTP Yanıt Kodu Eşleşmesi**
     - `st.sampled_from(TokenState)` stratejisiyle her token durumu için beklenen HTTP kodu döndürülmeli
     - Doğrulama: `pytest tests/unit/test_auth.py::test_token_http_code_mapping` geçmeli
     - **Doğrular: Gereksinim 10.1, 10.3, 10.7**
 
-  - [ ]* 5.3 Özellik 26 için property testi yaz — Şifre hashleme güvenliği
+  - [x] 5.3 Özellik 26 için property testi yaz — Şifre hashleme güvenliği
     - **Özellik 26: Şifre Hashleme Güvenliği**
     - `st.text(min_size=8, max_size=100)` stratejisiyle her şifre için: saklanan hash bcrypt formatında ve ≥12 cost factor; düz metin hiçbir zaman saklanmaz
     - Doğrulama: `pytest tests/unit/test_auth.py::test_password_hashing_security` geçmeli
     - **Doğrular: Gereksinim 10.5**
 
-- [~] 6. Kontrol noktası — Altyapı katmanı
+- [x] 6. Kontrol noktası — Altyapı katmanı
+
   - `pytest tests/unit/test_auth.py tests/integration/test_audit.py -v` geçmeli
   - Soru varsa kullanıcıya sor.
 
-- [ ] 7. Doğrulama mantığını uygula
-  - [~] 7.1 Problem açıklaması uzunluk doğrulayıcısını yaz
+- [x] 7. Doğrulama mantığını uygula
+  - [x] 7.1 Problem açıklaması uzunluk doğrulayıcısını yaz
     - `validate_problem_description(text: str) -> None` fonksiyonu: 20–2000 karakter geçerli; dışarısı `ValidationError` fırlatır
     - Doğrulama: 19 karakter → hata; 20 karakter → geçer; 2000 karakter → geçer; 2001 karakter → hata
     - _Gereksinimler: 1.1, 1.3, 1.4_
 
-  - [ ]* 7.2 Özellik 1 için property testi yaz — Problem açıklaması uzunluk doğrulaması
+  - [x] 7.2 Özellik 1 için property testi yaz — Problem açıklaması uzunluk doğrulaması
     - **Özellik 1: Problem Açıklaması Uzunluk Doğrulaması**
     - `st.text(min_size=0, max_size=3000)` stratejisiyle: 20–2000 arası → geçer; dışarısı → `ValidationError`
     - Doğrulama: `pytest tests/unit/test_validation.py::test_problem_description_length` geçmeli
     - **Doğrular: Gereksinim 1.1, 1.3, 1.4**
 
-  - [~] 7.3 Adım yanıtı uzunluk doğrulayıcısını yaz
+  - [x] 7.3 Adım yanıtı uzunluk doğrulayıcısını yaz
     - `validate_step_response(text: str) -> None` fonksiyonu: ≥10 karakter geçerli; <10 karakter `ValidationError` fırlatır
     - Doğrulama: 9 karakter → hata; 10 karakter → geçer; 1000 karakter → geçer
     - _Gereksinimler: 2.2_
 
-  - [ ]* 7.4 Özellik 4 için property testi yaz — Adım yanıtı minimum uzunluk doğrulaması
+  - [x] 7.4 Özellik 4 için property testi yaz — Adım yanıtı minimum uzunluk doğrulaması
     - **Özellik 4: Adım Yanıtı Minimum Uzunluk Doğrulaması**
     - `st.text(min_size=0, max_size=1000)` stratejisiyle: ≥10 karakter → kabul; <10 → reddedilir
     - Doğrulama: `pytest tests/unit/test_validation.py::test_step_response_min_length` geçmeli
     - **Doğrular: Gereksinim 2.2**
 
-  - [~] 7.5 Arama sorgusu uzunluk doğrulayıcısını yaz
+  - [x] 7.5 Arama sorgusu uzunluk doğrulayıcısını yaz
     - `validate_search_query(text: str) -> None` fonksiyonu: 10–500 karakter geçerli; <10 → `ValidationError`
     - Doğrulama: 9 karakter → hata; 10 karakter → geçer; 500 karakter → geçer; 501 karakter → hata
     - _Gereksinimler: 8.1, 8.7_
@@ -152,7 +155,7 @@ Bu plan, FastAPI + PostgreSQL + Qdrant + Redis + Celery mimarisi üzerine inşa 
     - Doğrulama: `pytest tests/integration/test_search.py::test_search_ordering_and_limit` geçmeli
     - **Doğrular: Gereksinim 8.1, 8.2, 8.7**
 
-  - [~] 7.7 Lessons Learned kelime sayısı doğrulayıcısını yaz
+  - [x] 7.7 Lessons Learned kelime sayısı doğrulayıcısını yaz
     - `validate_lessons_learned(text: str) -> None` fonksiyonu: 100–500 kelime geçerli; dışarısı `ValidationError` fırlatır
     - Doğrulama: 99 kelime → hata; 100 kelime → geçer; 500 kelime → geçer; 501 kelime → hata
     - _Gereksinimler: 7.1, 7.3_

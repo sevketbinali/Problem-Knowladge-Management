@@ -11,6 +11,8 @@ pytestmark = pytest.mark.asyncio
 
 @pytest.fixture(scope="module")
 async def test_user_id():
+
+
     """Create a test user for foreign keys."""
     async with AsyncSessionLocal() as session:
         repo = PostgreSQLRepository(session)
