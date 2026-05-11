@@ -23,66 +23,111 @@ if "view_mode" not in st.session_state:
 # --- Custom Styling ---
 st.markdown("""
 <style>
-    /* Global Background */
-    .stApp {
-        background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
+    html, body, [data-testid="stAppViewContainer"] {
+        font-family: 'Inter', sans-serif;
+        background-color: #f8fafc;
     }
-    
-    /* Card Style */
+
+    /* Global Styles */
+    .main {
+        padding: 2rem;
+    }
+
+    /* Professional Card Styling */
     .report-card {
-        padding: 25px;
-        border-radius: 15px;
-        background-color: #ffffff !important; /* Force solid white for maximum contrast */
-        border-left: 8px solid #3f51b5;
-        box-shadow: 0 10px 20px rgba(0,0,0,0.1);
-        margin-bottom: 25px;
-        color: #1a1a1a !important;
+        padding: 1.5rem;
+        border-radius: 0.75rem;
+        background-color: #ffffff;
+        border: 1px solid #e2e8f0;
+        box-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1);
+        margin-bottom: 1.5rem;
+        transition: all 0.2s;
     }
-    
-    /* Specific overrides for markdown elements inside cards */
-    .report-card p, .report-card div, .report-card li, .report-card span {
-        color: #1a1a1a !important;
-    }
-    
-    .report-card h1, .report-card h2, .report-card h3, .report-card h4 {
-        color: #3f51b5 !important;
-        margin-top: 0;
+    .report-card:hover {
+        box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+        border-color: #cbd5e1;
     }
 
-    /* Analysis Step Nodes */
-    .step-node {
-        padding: 15px;
-        border: 1px solid #e0e0e0;
-        border-radius: 10px;
-        background-color: #ffffff !important;
-        margin-bottom: 10px;
-        border-left: 5px solid #ffc107;
-        box-shadow: 2px 2px 10px rgba(0,0,0,0.05);
-        color: #2c3e50 !important;
-        font-size: 0.95rem;
-        line-height: 1.5;
-    }
-    
-    .step-node p, .step-node span, .step-node b {
-        color: #2c3e50 !important;
+    .report-card h4 {
+        color: #0f172a;
+        font-weight: 700;
+        margin-bottom: 0.5rem;
+        font-size: 1.25rem;
     }
 
-    /* Why Chain Connector */
-    .connector {
-        text-align: center;
-        color: #3f51b5;
-        font-weight: bold;
-        font-size: 20px;
-        margin: -5px 0 5px 0;
+    /* Department & Tag Layout */
+    .meta-row {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        flex-wrap: wrap;
+        margin-bottom: 1rem;
+    }
+
+    .dept-badge {
+        background: #0f172a;
+        color: white;
+        padding: 4px 12px;
+        border-radius: 9999px;
+        font-size: 0.75rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.025em;
+    }
+
+    .tag-container {
+        display: flex;
+        gap: 8px;
+        flex-wrap: wrap;
+    }
+
+    .tag-badge {
+        background: #f1f5f9;
+        color: #475569;
+        padding: 2px 10px;
+        border-radius: 6px;
+        font-size: 0.75rem;
+        font-weight: 500;
+        border: 1px solid #e2e8f0;
     }
 
     /* Sidebar Styling */
-    section[data-testid="stSidebar"] {
-        background-color: #1a237e;
-        color: white;
+    [data-testid="stSidebar"] {
+        background-color: #0f172a;
+        color: #f8fafc;
     }
-    section[data-testid="stSidebar"] h1, section[data-testid="stSidebar"] h2 {
-        color: white !important;
+    [data-testid="stSidebar"] [data-testid="stMarkdownContainer"] p {
+        color: #cbd5e1;
+    }
+    [data-testid="stSidebar"] h1, [data-testid="stSidebar"] h2, [data-testid="stSidebar"] h3 {
+        color: #ffffff !important;
+    }
+
+    /* Step Nodes */
+    .step-node {
+        padding: 1rem;
+        background: white;
+        border: 1px solid #e2e8f0;
+        border-radius: 0.5rem;
+        border-left: 4px solid #3b82f6;
+        margin-bottom: 0.75rem;
+        font-size: 0.925rem;
+        color: #334155;
+    }
+
+    .connector {
+        color: #3b82f6;
+        font-weight: bold;
+        text-align: center;
+        margin: -4px 0 8px 0;
+    }
+
+    /* Buttons */
+    .stButton>button {
+        border-radius: 0.5rem;
+        font-weight: 500;
     }
 </style>
 """, unsafe_allow_html=True)
@@ -134,17 +179,17 @@ def render_knowledge_base():
                 for r in records:
                     with st.container():
                         # Tags display
-                        tags_html = "".join([f"<span style='background: #e1f5fe; padding: 2px 6px; border-radius: 4px; font-size: 0.7rem; color: #0288d1; margin-right: 5px;'>#{t}</span>" for t in r.get('tags', [])])
+                        tags_html = "".join([f"<span class='tag-badge'>#{t}</span>" for t in r.get('tags', [])])
                         
                         st.markdown(f"""
                         <div class='report-card'>
                             <h4>{r['title']}</h4>
-                            <p style='margin-bottom: 5px;'>
-                                <span style='background: #e8eaf6; padding: 2px 8px; border-radius: 4px; font-size: 0.8rem; color: #3f51b5; font-weight: bold;'>{r.get('department', 'GENEL')}</span>
-                                <span style='margin-left: 10px; color: #666;'>{r['methodology'].upper()} | {r['created_at'][:10]}</span>
-                            </p>
-                            <div style='margin-bottom: 10px;'>{tags_html}</div>
-                            <p><b>Kök Neden:</b> {r['root_cause'][:200]}...</p>
+                            <div class='meta-row'>
+                                <span class='dept-badge'>{r.get('department', 'GENEL')}</span>
+                                <div class='tag-container'>{tags_html}</div>
+                                <span style='color: #64748b; font-size: 0.75rem; margin-left: auto;'>{r['methodology'].upper()} | {r['created_at'][:10]}</span>
+                            </div>
+                            <p style='color: #334155; font-size: 0.95rem;'><b>Kök Neden:</b> {r['root_cause'][:200]}...</p>
                         </div>
                         """, unsafe_allow_html=True)
                         if st.button(f"Detayları Gör: {r['id'][:8]}...", key=r['id']):
@@ -152,6 +197,59 @@ def render_knowledge_base():
                             st.rerun()
         else:
             st.error("Kayıtlar alınamadı.")
+
+def render_record_detail(record_id):
+    if st.button("⬅️ Listeye Geri Dön"):
+        st.session_state.selected_record_id = None
+        st.rerun()
+        
+    with st.spinner("Detaylar getiriliyor..."):
+        resp = requests.get(f"{API_URL}/records/{record_id}", headers=get_headers())
+        if resp.status_code == 200:
+            r = resp.json()["data"]
+            st.title(f"📄 {r['title']}")
+            
+            col1, col2 = st.columns([2, 1])
+            
+            with col1:
+                # Tags & Meta
+                tags_html = "".join([f"<span class='tag-badge'>#{t}</span>" for t in r.get('tags', [])])
+                st.markdown(f"""
+                <div class='meta-row' style='margin-bottom: 1.5rem;'>
+                    <span class='dept-badge'>{r.get('department', 'Genel')}</span>
+                    <div class='tag-container'>{tags_html}</div>
+                </div>
+                """, unsafe_allow_html=True)
+                
+                st.markdown(f"""
+                <div class='report-card'>
+                    <h3 style='color: #0f172a; font-size: 1.1rem; margin-top: 0;'>🎯 Problem Tanımı</h3>
+                    <p style='color: #334155;'>{r['problem_description']}</p>
+                    <hr style='border: 0; border-top: 1px solid #e2e8f0; margin: 1.5rem 0;'>
+                    <h3 style='color: #0f172a; font-size: 1.1rem;'>🔍 Kök Neden</h3>
+                    <p style='color: #0f172a; font-weight: 600;'>{r['root_cause']}</p>
+                    <hr style='border: 0; border-top: 1px solid #e2e8f0; margin: 1.5rem 0;'>
+                    <h3 style='color: #0f172a; font-size: 1.1rem;'>🎓 Alınan Dersler</h3>
+                    <p style='color: #334155;'>{r['lessons_learned']}</p>
+                </div>
+                """, unsafe_allow_html=True)
+            
+            with col2:
+                st.info(f"**Bölüm:** {r.get('department', 'Genel')}")
+                st.info(f"**Metodoloji:** {r['methodology'].upper()}")
+                st.info(f"**Tarih:** {r['created_at'][:10]}")
+                
+                # If it's a 5-Why, we can try to show the chain if step_responses exist
+                if r['methodology'] == '5why' and r.get('step_responses'):
+                    st.subheader("⛓️ Neden Zinciri")
+                    steps = r['step_responses']
+                    if isinstance(steps, dict):
+                        for i in range(1, 6):
+                            val = steps.get(str(i)) or steps.get(i)
+                            if val:
+                                st.markdown(f"<div class='step-node'><b>{i}. Neden:</b><br>{val}</div>", unsafe_allow_html=True)
+        else:
+            st.error("Kayıt detayları alınamadı.")
 
 def render_why_chain():
     """Visual representation of 5-Why flow."""
@@ -223,7 +321,10 @@ else:
 
     # Main Layout
     if st.session_state.view_mode == "Bilgi Bankası":
-        render_knowledge_base()
+        if st.session_state.get("selected_record_id"):
+            render_record_detail(st.session_state.selected_record_id)
+        else:
+            render_knowledge_base()
     else:
         col1, col2 = st.columns([2, 1])
 

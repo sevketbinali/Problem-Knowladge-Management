@@ -1,6 +1,6 @@
 """Service for interacting with Google Gemini LLM."""
 import asyncio
-from typing import List, Optional
+from typing import List, Optional, Dict, Any
 
 from google import genai
 from src.core.config import settings
