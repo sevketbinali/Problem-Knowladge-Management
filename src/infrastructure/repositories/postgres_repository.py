@@ -11,6 +11,23 @@ class PostgreSQLRepository:
     def __init__(self, session: AsyncSession):
         self.session = session
 
+    # User Operations
+    async def get_user_by_email(self, email: str) -> User | None:
+        result = await self.session.execute(select(User).where(User.email == email))
+        return result.scalar_one_or_none()
+
+    async def create_user(self, email: str, hashed_password: str, full_name: str, role: str = "user") -> User:
+        user = User(
+            email=email,
+            hashed_password=hashed_password,
+            full_name=full_name,
+            role=role
+        )
+        self.session.add(user)
+        await self.session.commit()
+        await self.session.refresh(user)
+        return user
+
     # Session CRUD
     async def create_session(self, user_id: uuid.UUID, problem_description: str, methodology: str) -> Session:
         db_session = Session(
