@@ -36,6 +36,8 @@ ENV PYTHONPATH=/app
 
 # Copy the application code
 COPY src/ src/
+COPY alembic/ alembic/
+COPY alembic.ini .
 
 # Expose port 8000
 EXPOSE 8000
