@@ -55,28 +55,51 @@ else:
         st.divider()
         st.subheader("Oturum Kontrolü")
         
+        if "finalized_report" not in st.session_state:
+            st.session_state.finalized_report = None
+            
         if st.session_state.current_session_id:
             st.success(f"Aktif Oturum: {st.session_state.current_session_id[:8]}...")
             if st.button("Oturumu Finalize Et"):
-                with st.spinner("Lessons Learned üretiliyor..."):
+                with st.spinner("Lessons Learned üretiliyor... (Bu işlem AI modeline göre biraz sürebilir)"):
                     resp = requests.post(
                         f"{API_URL}/sessions/{st.session_state.current_session_id}/finalize",
                         headers=get_headers()
                     )
                     if resp.status_code == 200:
+                        data = resp.json()["data"]
                         st.session_state.current_session_id = None
                         st.session_state.chat_history = []
-                        st.success("Oturum başarıyla tamamlandı ve kaydedildi!")
+                        st.session_state.finalized_report = data
+                        st.success("Oturum başarıyla tamamlandı ve veritabanına kaydedildi!")
+                        st.rerun()
                     else:
                         st.error(f"Hata: {resp.json().get('error', 'Bilinmeyen hata')}")
         else:
-            st.info("Yeni bir problem oturumu başlatabilirsiniz.")
+            if not st.session_state.get("finalized_report"):
+                st.info("Yeni bir problem oturumu başlatabilirsiniz.")
+            else:
+                if st.button("Yeni Oturum Başlat"):
+                    st.session_state.finalized_report = None
+                    st.rerun()
 
     # Main Layout
     col1, col2 = st.columns([2, 1])
 
     with col1:
-        if not st.session_state.current_session_id:
+        if st.session_state.get("finalized_report"):
+            st.title("📄 Çözüm Raporu (Lessons Learned)")
+            report = st.session_state.finalized_report
+            st.success("Bu problem bilgi bankamıza (Knowledge Base) başarıyla eklendi!")
+            
+            st.subheader(report.get("title", "Problem Raporu"))
+            st.write(f"**Kayıt ID:** `{report.get('record_id')}`")
+            st.write(f"**Durum:** `{report.get('status')}`")
+            
+            st.markdown("### 🎓 Alınan Dersler (Lessons Learned)")
+            st.info(report.get("lessons_learned", "Bilgi yok."))
+            
+        elif not st.session_state.current_session_id:
             st.title("Yeni Problem Çözüm Oturumu")
             with st.form("new_session_form"):
                 problem_desc = st.text_area("Problem Açıklaması", height=100, placeholder="En az 20 karakter uzunluğunda problemi detaylıca açıklayın...")

@@ -117,8 +117,8 @@ async def finalize_session(
     service: SessionService = Depends(get_session_service)
 ):
     """Finalize the session and trigger report generation."""
-    session = await service.repository.get_session(session_id)
-    if not session or session.status != "completed":
-        raise HTTPException(status_code=400, detail="Session is not ready for finalization")
-    
-    return APIResponse(data={"status": "completed"}, message="Session finalized. Report is being generated.")
+    try:
+        result = await service.finalize_session(session_id)
+        return APIResponse(data=result, message="Session finalized and knowledge record created.")
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))

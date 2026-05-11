@@ -234,3 +234,56 @@ class SessionService:
             "next_prompt": step.question if step else "Soru bulunamadı.",
             "previous_response": (db_session.step_responses or {}).get(str(prev_step_index))
         }
+
+    async def finalize_session(self, session_id: uuid.UUID) -> Dict[str, Any]:
+        """Requirement 3: Finalize session, generate lessons learned, and store record."""
+        db_session = await self.repository.get_session(session_id)
+        if not db_session or db_session.status != "completed":
+            raise ValueError("Session is not completed or not found")
+        
+        step_responses = db_session.step_responses or {}
+        
+        # Determine root cause based on methodology
+        m_type = MethodologyType(db_session.methodology)
+        root_cause = "Not determined"
+        if m_type == MethodologyType.FIVE_WHY:
+            root_cause = step_responses.get("root_cause", "")
+        elif m_type == MethodologyType.EIGHT_D:
+            root_cause = step_responses.get("d4_root_cause", "")
+        else:
+            # Fallback for PDCA / Ishikawa
+            root_cause = str(step_responses)
+
+        # Generate Lessons Learned
+        lessons_learned = await self.llm.generate_lessons_learned(
+            problem_description=db_session.problem_description,
+            root_cause=root_cause,
+            methodology=db_session.methodology
+        )
+        
+        # Save to DB
+        record = await self.repository.create_problem_record(
+            title=f"Problem: {db_session.problem_description[:30]}...",
+            problem_description=db_session.problem_description,
+            methodology=db_session.methodology,
+            step_responses=step_responses,
+            root_cause=root_cause,
+            corrective_actions=["Pending"],
+            lessons_learned=lessons_learned
+        )
+        
+        # Embed and store in Qdrant if available
+        if self.rag:
+            try:
+                await self.rag.embed_and_store(record)
+                await self.repository.update_problem_record_status(record.id, "embedded")
+            except Exception as e:
+                print(f"Failed to embed record {record.id}: {str(e)}")
+                await self.repository.update_problem_record_status(record.id, "embedding_failed")
+                
+        return {
+            "record_id": str(record.id),
+            "title": record.title,
+            "lessons_learned": lessons_learned,
+            "status": "finalized"
+        }
