@@ -1,23 +1,21 @@
-version: "3.9"
+version: '3.8'
 
 services:
-  # ── FastAPI backend ──────────────────────────────────────────────────────────
   api:
-    build:
-      context: .
-      dockerfile: Dockerfile
-    container_name: pkms_api
-    restart: unless-stopped
+    build: .
+    container_name: pkm_api
     ports:
       - "8000:8000"
-    env_file:
-      - .env
     environment:
-      DATABASE_URL: postgresql+asyncpg://${POSTGRES_USER:-pkms}:${POSTGRES_PASSWORD:-pkms_secret}@postgres:5432/${POSTGRES_DB:-pkms}
-      QDRANT_URL: http://qdrant:6333
-      REDIS_URL: redis://redis:6379/0
+      - DATABASE_URL=postgresql+asyncpg://pkm_user:pkm_password@postgres:5432/pkm_db
+      - QDRANT_URL=http://qdrant:6333
+      - REDIS_URL=redis://redis:6379
+      - GEMINI_API_KEY=${GEMINI_API_KEY:-}
+      - JWT_SECRET=${JWT_SECRET:-dev_secret_key_change_in_prod}
+      - INITIAL_ADMIN_EMAIL=${INITIAL_ADMIN_EMAIL:-admin@pkm.local}
+      - INITIAL_ADMIN_PASSWORD=${INITIAL_ADMIN_PASSWORD:-Admin123!}
     volumes:
-      - .:/app
+      - ./src:/app/src
     depends_on:
       postgres:
         condition: service_healthy
@@ -25,63 +23,63 @@ services:
         condition: service_started
       redis:
         condition: service_healthy
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8000/ready"]
-      interval: 10s
-      timeout: 5s
-      retries: 12
-      start_period: 20s
-
-  # ── PostgreSQL ───────────────────────────────────────────────────────────────
-  postgres:
-    image: postgres:16-alpine
-    container_name: pkms_postgres
+    networks:
+      - pkm_network
     restart: unless-stopped
-    environment:
-      POSTGRES_USER: ${POSTGRES_USER:-pkms}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-pkms_secret}
-      POSTGRES_DB: ${POSTGRES_DB:-pkms}
-    volumes:
-      - postgres_data:/var/lib/postgresql/data
+
+  postgres:
+    image: postgres:15-alpine
+    container_name: pkm_postgres
     ports:
       - "5432:5432"
+    environment:
+      - POSTGRES_USER=pkm_user
+      - POSTGRES_PASSWORD=pkm_password
+      - POSTGRES_DB=pkm_db
+    volumes:
+      - pgdata:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-pkms} -d ${POSTGRES_DB:-pkms}"]
+      test: ["CMD-SHELL", "pg_isready -U pkm_user -d pkm_db"]
       interval: 5s
       timeout: 5s
-      retries: 10
-
-  # ── Qdrant vector store ──────────────────────────────────────────────────────
-  qdrant:
-    image: qdrant/qdrant:v1.7.4
-    container_name: pkms_qdrant
+      retries: 5
+    networks:
+      - pkm_network
     restart: unless-stopped
+
+  qdrant:
+    image: qdrant/qdrant:v1.7.0
+    container_name: pkm_qdrant
     ports:
       - "6333:6333"
       - "6334:6334"
     volumes:
       - qdrant_data:/qdrant/storage
+    networks:
+      - pkm_network
+    restart: unless-stopped
 
-  # ── Redis ────────────────────────────────────────────────────────────────────
   redis:
     image: redis:7-alpine
-    container_name: pkms_redis
-    restart: unless-stopped
+    container_name: pkm_redis
     ports:
       - "6379:6379"
     volumes:
       - redis_data:/data
-    command: redis-server --appendonly yes
     healthcheck:
       test: ["CMD", "redis-cli", "ping"]
       interval: 5s
-      timeout: 3s
-      retries: 10
+      timeout: 5s
+      retries: 5
+    networks:
+      - pkm_network
+    restart: unless-stopped
 
 volumes:
-  postgres_data:
-    name: pkms_postgres_data
+  pgdata:
   qdrant_data:
-    name: pkms_qdrant_data
   redis_data:
-    name: pkms_redis_data
+
+networks:
+  pkm_network:
+    driver: bridge

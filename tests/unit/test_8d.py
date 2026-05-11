@@ -40,3 +40,18 @@ async def test_8d_completion_requirement(session_service):
     args, kwargs = session_service.repository.update_session.call_args
     assert "d1_team" in kwargs["step_responses"]
     assert "d8_closure" in kwargs["step_responses"]
+from hypothesis import given, strategies as st
+from src.api.v1.schemas import EightDReport
+
+@given(st.fixed_dictionaries({
+    f"d{i+1}_{name}": st.text(min_size=10)
+    for i, name in enumerate(["team", "problem", "containment", "root_cause", "corrective", "implementation", "prevention", "closure"])
+}))
+def test_8d_report_schema_compliance(data):
+    """Requirement 5.4: 8D report JSON schema compliance property test."""
+    report = EightDReport(**data)
+    serialized = report.model_dump_json()
+    parsed = EightDReport.model_validate_json(serialized)
+    
+    for key, value in data.items():
+        assert getattr(parsed, key) == value

@@ -60,12 +60,14 @@ class SessionService:
         
         # Requirement 1.6: RAG search for similar records
         similar_records = []
+        message = None
         if self.rag:
             try:
                 similar_records = await self.rag.search_similar(problem_description, limit=5)
             except Exception as e:
+                # Requirement 23.2: Degraded mode warning
+                message = "Bilgi tabanına şu an erişilemiyor, oturum benzer kayıtlar olmadan devam edecek."
                 print(f"RAG Error during session start: {str(e)}")
-                # Degraded mode: session continues without RAG
         
         return {
             "session_id": str(db_session.id),
@@ -73,7 +75,8 @@ class SessionService:
             "current_step": 0,
             "next_prompt": first_step.question if first_step else None,
             "total_steps": len(template.steps) if m_type != MethodologyType.FIVE_WHY else 7,
-            "similar_problems": similar_records
+            "similar_problems": similar_records,
+            "message": message
         }
 
     async def submit_step_response(self, session_id: uuid.UUID, response: str) -> Dict[str, Any]:
@@ -145,7 +148,7 @@ class SessionService:
                 "current_step": db_session.current_step_index,
                 "next_prompt": followup_q,
                 "followup_count": new_count,
-                "can_proceed": False,
+                "can_proceed": new_count >= 3,
                 "status": "active"
             }
 

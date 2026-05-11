@@ -62,3 +62,17 @@ def test_ishikawa_data_model():
     )
     assert data.man == ["Fatigue"]
     assert len(data.model_dump()) == 6
+from src.api.v1.schemas import IshikawaData
+
+@given(st.fixed_dictionaries({
+    cat: st.lists(st.text(min_size=1), min_size=1, max_size=3)
+    for cat in ["man", "machine", "method", "material", "measurement", "environment"]
+}))
+def test_ishikawa_storage_roundtrip(data):
+    """Requirement 3.4: Ishikawa data storage round-trip property test."""
+    ishikawa = IshikawaData(**data)
+    serialized = ishikawa.model_dump_json()
+    parsed = IshikawaData.model_validate_json(serialized)
+    
+    for cat in data:
+        assert getattr(parsed, cat) == data[cat]

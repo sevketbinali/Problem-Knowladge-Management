@@ -20,6 +20,8 @@ class Settings:
     JWT_SECRET: str
     JWT_ALGORITHM: str = "HS256"
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 60
+    INITIAL_ADMIN_EMAIL: str = "admin@pkm.local"
+    INITIAL_ADMIN_PASSWORD: str = "Admin123!"
 
     def __init__(self):
         self.DATABASE_URL = os.getenv("DATABASE_URL", "")
@@ -36,6 +38,9 @@ class Settings:
         self.JWT_SECRET = os.getenv("JWT_SECRET", "fallback_secret_for_dev_only")
         self.JWT_ALGORITHM = os.getenv("JWT_ALGORITHM", "HS256")
         self.ACCESS_TOKEN_EXPIRE_MINUTES = int(os.getenv("ACCESS_TOKEN_EXPIRE_MINUTES", "60"))
+        self.INITIAL_ADMIN_EMAIL = os.getenv("INITIAL_ADMIN_EMAIL", "admin@pkm.local")
+        self.INITIAL_ADMIN_PASSWORD = os.getenv("INITIAL_ADMIN_PASSWORD", "Admin123!")
 
 
 settings = Settings()
+

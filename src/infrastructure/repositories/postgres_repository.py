@@ -50,6 +50,11 @@ class PostgreSQLRepository:
         )
         await self.session.commit()
         return await self.get_session(session_id)
+    async def list_sessions_for_user(self, user_id: uuid.UUID) -> Sequence[Session]:
+        result = await self.session.execute(
+            select(Session).where(Session.user_id == user_id).order_by(Session.created_at.desc())
+        )
+        return result.scalars().all()
 
     # ProblemRecord CRUD
     async def create_record(self, **kwargs) -> ProblemRecord:

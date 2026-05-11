@@ -1,24 +1,26 @@
 """FastAPI application entry point."""
 from contextlib import asynccontextmanager
 
-from fastapi import FastAPI, Depends
+from fastapi import FastAPI, Request
 from fastapi.responses import JSONResponse
-from sqlalchemy import text
-from sqlalchemy.ext.asyncio import AsyncSession
+from starlette.exceptions import HTTPException as StarletteHTTPException
 
-from src.api.v1.dependencies import get_db
-from src.core.config import settings
-from src.infrastructure.repositories.qdrant_repository import QdrantRepository
-from src.infrastructure.services.redis_service import RedisService
+from src.api.v1.analysis import router as analysis_router
+from src.api.v1.auth import router as auth_router
+from src.api.v1.health import router as health_router
+from src.api.v1.knowledge import router as knowledge_router
+from src.api.v1.records import router as records_router
+from src.api.v1.sessions import router as session_router
 
+from src.infrastructure.database import init_db
 
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     """Application lifespan: startup and shutdown events."""
-    # Startup
+    # Startup: Initialize DB and Admin
+    await init_db()
     yield
-    # Shutdown
 
 
 app = FastAPI(
@@ -28,55 +30,35 @@ app = FastAPI(
     lifespan=lifespan,
 )
 
-# Register routers
-from src.api.v1.analysis import router as analysis_router
-from src.api.v1.auth import router as auth_router
-from src.api.v1.search import router as search_router
-from src.api.v1.sessions import router as session_router
+# Exception Handlers (Task 21.6)
+@app.exception_handler(StarletteHTTPException)
+async def http_exception_handler(request: Request, exc: StarletteHTTPException):
+    return JSONResponse(
+        status_code=exc.status_code,
+        content={
+            "status": "error",
+            "data": None,
+            "error": str(exc.detail),
+            "message": None
+        }
+    )
 
+@app.exception_handler(Exception)
+async def general_exception_handler(request: Request, exc: Exception):
+    return JSONResponse(
+        status_code=500,
+        content={
+            "status": "error",
+            "data": None,
+            "error": "Internal Server Error",
+            "message": str(exc) if not app.debug else None
+        }
+    )
+
+# Register routers
 app.include_router(auth_router, prefix="/api/v1")
 app.include_router(session_router, prefix="/api/v1")
 app.include_router(analysis_router, prefix="/api/v1")
-app.include_router(search_router, prefix="/api/v1")
-
-
-
-@app.get("/health")
-async def health():
-    """Health check endpoint — returns 200 if the API process is running."""
-    return JSONResponse(
-        status_code=200,
-        content={"status": "success", "data": {"healthy": True}, "error": None},
-    )
-
-
-@app.get("/ready")
-async def ready(
-    db_session: AsyncSession = Depends(get_db)
-):
-    """Readiness check endpoint — returns 200 when all dependencies are reachable."""
-    # Check PostgreSQL
-    try:
-        await db_session.execute(text("SELECT 1"))
-    except Exception:
-        return JSONResponse(status_code=503, content={"status": "error", "message": "Database unreachable"})
-
-    # Check Qdrant
-    qdrant = QdrantRepository()
-    if not await qdrant.is_healthy():
-         return JSONResponse(status_code=503, content={"status": "error", "message": "Qdrant unreachable"})
-
-    # Check Redis
-    redis = RedisService()
-    try:
-        await redis.client.ping()
-    except Exception:
-        return JSONResponse(status_code=503, content={"status": "error", "message": "Redis unreachable"})
-    finally:
-        await redis.close()
-
-    return JSONResponse(
-        status_code=200,
-        content={"status": "success", "data": {"ready": True}, "error": None},
-    )
-
+app.include_router(knowledge_router, prefix="/api/v1")
+app.include_router(records_router, prefix="/api/v1")
+app.include_router(health_router, prefix="/api/v1")

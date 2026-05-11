@@ -4,6 +4,15 @@ from datetime import datetime
 from typing import Any, Dict, List, Optional
 
 from pydantic import BaseModel, EmailStr, Field
+from typing import Generic, TypeVar
+
+T = TypeVar("T")
+
+class APIResponse(BaseModel, Generic[T]):
+    status: str = "success"
+    data: Optional[T] = None
+    error: Optional[str] = None
+    message: Optional[str] = None
 
 
 # Auth Schemas
@@ -43,13 +52,16 @@ class SessionResponse(BaseModel):
     methodology: str
     current_step: int
     next_prompt: Optional[str] = None
-    total_steps: int
+    total_steps: Optional[int] = None
     status: str = "active"
-    suggestions: Optional[List[str]] = None
+    can_proceed: Optional[bool] = None
+    category_suggestion: Optional[str] = None
+    error: Optional[str] = None
+    similar_problems: Optional[List[Dict[str, Any]]] = None
+    message: Optional[str] = None
 
 class StepResponse(BaseModel):
     response: str = Field(..., min_length=10)
-    suggestions: Optional[List[str]] = None
 
 
 
@@ -95,3 +107,25 @@ class ProblemRecord(BaseModel):
     class Config:
         from_attributes = True
 
+class WhyChain(BaseModel):
+    questions: List[str]
+    answers: List[str]
+    root_cause: str
+
+class IshikawaData(BaseModel):
+    man: List[str]
+    machine: List[str]
+    method: List[str]
+    material: List[str]
+    measurement: List[str]
+    environment: List[str]
+
+class EightDReport(BaseModel):
+    d1_team: str
+    d2_problem: str
+    d3_containment: str
+    d4_root_cause: str
+    d5_corrective: str
+    d6_implementation: str
+    d7_prevention: str
+    d8_closure: str

@@ -55,7 +55,7 @@ async def test_5why_question_count_limits(session_service):
     
     result = await session_service.submit_step_response(session_id, "Answer 7")
     assert result["status"] == "completed"
-    assert "7. neden alındı" in result["message"]
+    assert "5 Why analizi tamamlandı" in result["message"]
 
 @given(st.lists(st.text(min_size=5), min_size=2, max_size=5))
 def test_circular_logic_property(prev_answers):
@@ -68,3 +68,23 @@ def test_circular_logic_property(prev_answers):
     # If we use the exact same answer as one of the previous ones
     for ans in prev_answers:
         assert svc.detect_circular_logic(ans, prev_answers) is True
+from src.api.v1.schemas import WhyChain
+
+@given(st.lists(st.tuples(st.text(min_size=10), st.text(min_size=10)), min_size=3, max_size=7), st.text(min_size=10))
+def test_5why_chain_roundtrip(pairs, root_cause):
+    """Requirement 4.6: 5 Why chain storage round-trip property test."""
+    questions = [p[0] for p in pairs]
+    answers = [p[1] for p in pairs]
+    
+    chain = WhyChain(
+        questions=questions,
+        answers=answers,
+        root_cause=root_cause
+    )
+    
+    serialized = chain.model_dump_json()
+    parsed = WhyChain.model_validate_json(serialized)
+    
+    assert parsed.questions == questions
+    assert parsed.answers == answers
+    assert parsed.root_cause == root_cause

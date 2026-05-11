@@ -10,6 +10,8 @@ from src.infrastructure.database import AsyncSessionLocal
 from src.infrastructure.models import User
 from src.infrastructure.repositories.postgres_repository import PostgreSQLRepository
 from src.infrastructure.services.redis_service import RedisService
+from src.infrastructure.services.embedding_service import EmbeddingService
+from src.infrastructure.services.rag_engine import RAGEngine
 
 # OAuth2 scheme for token extraction
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/api/v1/auth/login")
@@ -91,3 +93,15 @@ async def check_rate_limit(
             status_code=status.HTTP_429_TOO_MANY_REQUESTS,
             detail="Rate limit exceeded. Please try again later."
         )
+
+
+async def get_embedding_service() -> EmbeddingService:
+    """Dependency to provide an embedding service."""
+    return EmbeddingService()
+
+
+async def get_rag_engine(
+    embedding_service: EmbeddingService = Depends(get_embedding_service)
+) -> RAGEngine:
+    """Dependency to provide a RAG engine."""
+    return RAGEngine(embedding_service)

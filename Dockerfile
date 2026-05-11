@@ -1,55 +1,44 @@
-# ── Stage 1: Builder ─────────────────────────────────────────────────────────
+# Use official Python 3.11 slim image for smaller size
 FROM python:3.11-slim as builder
 
-WORKDIR /build
+# Set working directory
+WORKDIR /app
 
-# Install build dependencies
-RUN apt-get update && \
-    apt-get install -y --no-install-recommends \
+# Prevent Python from writing pyc files and enable unbuffered logging
+ENV PYTHONDONTWRITEBYTECODE=1
+ENV PYTHONUNBUFFERED=1
+
+# Install build dependencies (if any native extensions are needed)
+RUN apt-get update && apt-get install -y --no-install-recommends \
     gcc \
     libpq-dev \
-    curl && \
-    rm -rf /var/lib/apt/lists/*
+    && rm -rf /var/lib/apt/lists/*
 
-# Copy dependency files
-COPY pyproject.toml ./
+# Copy pyproject.toml and source code
+COPY pyproject.toml .
+COPY src/ src/
 
-# Install dependencies to a virtual environment
+# Install the package and its dependencies
+# Using a virtual environment is best practice even in Docker
 RUN python -m venv /opt/venv
 ENV PATH="/opt/venv/bin:$PATH"
-RUN pip install --no-cache-dir --upgrade pip && \
-    pip install --no-cache-dir -e ".[dev]"
+RUN pip install --no-cache-dir .
 
-# ── Stage 2: Runtime ──────────────────────────────────────────────────────────
+# Start a new, smaller stage
 FROM python:3.11-slim
 
 WORKDIR /app
 
-# Install runtime dependencies only
-RUN apt-get update && \
-    apt-get install -y --no-install-recommends \
-    libpq5 \
-    curl && \
-    rm -rf /var/lib/apt/lists/*
-
-# Copy virtual environment from builder
+# Copy the virtual environment from the builder stage
 COPY --from=builder /opt/venv /opt/venv
 ENV PATH="/opt/venv/bin:$PATH"
+ENV PYTHONPATH=/app
 
-# Copy application code
-COPY src/ ./src/
+# Copy the application code
+COPY src/ src/
 
-# Create non-root user
-RUN useradd -m -u 1000 appuser && \
-    chown -R appuser:appuser /app
-USER appuser
-
-# Expose port
+# Expose port 8000
 EXPOSE 8000
 
-# Health check
-HEALTHCHECK --interval=30s --timeout=5s --start-period=20s --retries=3 \
-    CMD curl -f http://localhost:8000/health || exit 1
-
-# Run application
-CMD ["uvicorn", "src.main:app", "--host", "0.0.0.0", "--port", "8000"]
+# Command to run the application
+CMD ["uvicorn", "src.main:app", "--host", "0.0.0.0", "--port", "8000", "--proxy-headers"]

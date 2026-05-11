@@ -89,3 +89,41 @@ async def test_search_ordering_and_limit(test_user_id: uuid.UUID, test_session_i
         for rid in record_ids:
             await session.execute(text("DELETE FROM problem_records WHERE id = :rid"), {"rid": rid})
         await session.commit()
+@given(st.sampled_from(["open", "resolved", "closed"]))
+async def test_search_filter_consistency(test_user_id, test_session_id, status):
+    """Requirement 8.2: Search filter consistency property test."""
+    async with AsyncSessionLocal() as session:
+        repo = PostgreSQLRepository(session)
+        # Create a record with specific status
+        await repo.create_record(
+            session_id=test_session_id,
+            user_id=test_user_id,
+            title="Consistency Test",
+            problem_description="Test",
+            methodology="5_why",
+            step_responses={},
+            root_cause="None",
+            corrective_actions=[],
+            lessons_learned="None",
+            resolution_status=status
+        )
+        
+        # Search with that status
+        results = await repo.search_records("Consistency", status=status)
+        assert any(r.resolution_status == status for r in results)
+        
+        # Search with different status
+        other_status = "closed" if status == "open" else "open"
+        results_other = await repo.search_records("Consistency", status=other_status)
+        assert all(r.resolution_status != status for r in results_other)
+
+async def test_search_result_field_completeness(test_user_id, test_session_id):
+    """Requirement 8.1: Search result field completeness property test."""
+    async with AsyncSessionLocal() as session:
+        repo = PostgreSQLRepository(session)
+        results = await repo.search_records("Test")
+        for r in results:
+            assert r.id is not None
+            assert r.title is not None
+            assert r.created_at is not None
+            assert r.resolution_status is not None
