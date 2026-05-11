@@ -91,7 +91,7 @@ Sistem ayağa kalkarken **otomatik olarak şu Admin hesabını tanımlayacaktır
 
 | Giriş Ekranı | Analiz Süreci | Çözüm Raporu |
 | :---: | :---: | :---: |
-| ![Login](https://via.placeholder.com/200x120?text=Login+UI) | ![Chat](https://via.placeholder.com/200x120?text=AI+Chat+Analysis) | ![Report](https://via.placeholder.com/200x120?text=Lessons+Learned) |
+| ![Login]() | ![Chat]() | ![Report]() |
 
 ---
 
@@ -107,14 +107,3 @@ Sistem ayağa kalkarken **otomatik olarak şu Admin hesabını tanımlayacaktır
 └── README.md           # Bu dosya
 ```
 
----
-
-## 🤝 Katkıda Bulunma
-
-1. Bu projeyi fork'layın.
-2. Yeni bir feature branch oluşturun (`git checkout -b feature/YeniOzellik`).
-3. Değişikliklerinizi commit'leyin (`git commit -m 'Yeni özellik eklendi'`).
-4. Branch'inizi push'layın (`git push origin feature/YeniOzellik`).
-5. Bir Pull Request açın.
-
----
