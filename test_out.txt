@@ -1,0 +1,384 @@
+============================= test session starts ==============================
+platform linux -- Python 3.11.15, pytest-9.0.3, pluggy-1.6.0 -- /opt/venv/bin/python
+cachedir: .pytest_cache
+hypothesis profile 'default'
+rootdir: /app
+configfile: pyproject.toml
+plugins: anyio-4.13.0, asyncio-1.3.0, hypothesis-6.152.5
+asyncio: mode=Mode.AUTO, debug=False, asyncio_default_fixture_loop_scope=None, asyncio_default_test_loop_scope=function
+collecting ... collected 1 item
+
+tests/integration/test_audit.py::test_audit_log_integrity 
+TEST DATABASE_URL: postgresql+asyncpg://pkms:pkms_secret@postgres:5432/pkms
+
+
+USERS IN FIXTURE: 0
+
+FAILED
+
+=================================== FAILURES ===================================
+___________________________ test_audit_log_integrity ___________________________
+
+self = <sqlalchemy.dialects.postgresql.asyncpg.AsyncAdapt_asyncpg_cursor object at 0x7e7f5012fb20>
+operation = 'INSERT INTO audit_logs (id, user_id, operation, entity_type, entity_id, before_values, after_values, created_at) VALUES ($1::UUID, $2::UUID, $3::VARCHAR, $4::VARCHAR, $5::UUID, $6::JSONB, $7::JSONB, $8::TIMESTAMP WITHOUT TIME ZONE)'
+parameters = (UUID('16a4c443-14b9-4726-9f52-26f425321067'), UUID('6c717f7d-3fce-4f17-a581-ea15957948ca'), 'create', 'problem_record', UUID('cf30ccac-7fb4-4538-b067-b515272a2c93'), 'null', ...)
+
+    async def _prepare_and_execute(self, operation, parameters):
+        adapt_connection = self._adapt_connection
+    
+        async with adapt_connection._execute_mutex:
+            if not adapt_connection._started:
+                await adapt_connection._start_transaction()
+    
+            if parameters is None:
+                parameters = ()
+    
+            try:
+                prepared_stmt, attributes = await adapt_connection._prepare(
+                    operation, self._invalidate_schema_cache_asof
+                )
+    
+                if attributes:
+                    self.description = [
+                        (
+                            attr.name,
+                            attr.type.oid,
+                            None,
+                            None,
+                            None,
+                            None,
+                            None,
+                        )
+                        for attr in attributes
+                    ]
+                else:
+                    self.description = None
+    
+                if self.server_side:
+                    self._cursor = await prepared_stmt.cursor(*parameters)
+                    self.rowcount = -1
+                else:
+>                   self._rows = deque(await prepared_stmt.fetch(*parameters))
+                                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+/opt/venv/lib/python3.11/site-packages/sqlalchemy/dialects/postgresql/asyncpg.py:550: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+/opt/venv/lib/python3.11/site-packages/asyncpg/prepared_stmt.py:177: in fetch
+    data = await self.__bind_execute(args, 0, timeout)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/opt/venv/lib/python3.11/site-packages/asyncpg/prepared_stmt.py:268: in __bind_execute
+    data, status, _ = await self.__do_execute(
+/opt/venv/lib/python3.11/site-packages/asyncpg/prepared_stmt.py:257: in __do_execute
+    return await executor(protocol)
+           ^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+>   ???
+E   asyncpg.exceptions.UntranslatableCharacterError: unsupported Unicode escape sequence
+E   DETAIL:  \u0000 cannot be converted to text.
+
+asyncpg/protocol/protocol.pyx:205: UntranslatableCharacterError
+
+The above exception was the direct cause of the following exception:
+
+self = <sqlalchemy.engine.base.Connection object at 0x7e7f4af4be90>
+dialect = <sqlalchemy.dialects.postgresql.asyncpg.PGDialect_asyncpg object at 0x7e7f5110d710>
+context = <sqlalchemy.dialects.postgresql.asyncpg.PGExecutionContext_asyncpg object at 0x7e7f4af4bd10>
+statement = <sqlalchemy.dialects.postgresql.asyncpg.PGCompiler_asyncpg object at 0x7e7f502c6350>
+parameters = [(UUID('16a4c443-14b9-4726-9f52-26f425321067'), UUID('6c717f7d-3fce-4f17-a581-ea15957948ca'), 'create', 'problem_record', UUID('cf30ccac-7fb4-4538-b067-b515272a2c93'), 'null', ...)]
+
+    def _exec_single_context(
+        self,
+        dialect: Dialect,
+        context: ExecutionContext,
+        statement: Union[str, Compiled],
+        parameters: Optional[_AnyMultiExecuteParams],
+    ) -> CursorResult[Any]:
+        """continue the _execute_context() method for a single DBAPI
+        cursor.execute() or cursor.executemany() call.
+    
+        """
+        if dialect.bind_typing is BindTyping.SETINPUTSIZES:
+            generic_setinputsizes = context._prepare_set_input_sizes()
+    
+            if generic_setinputsizes:
+                try:
+                    dialect.do_set_input_sizes(
+                        context.cursor, generic_setinputsizes, context
+                    )
+                except BaseException as e:
+                    self._handle_dbapi_exception(
+                        e, str(statement), parameters, None, context
+                    )
+    
+        cursor, str_statement, parameters = (
+            context.cursor,
+            context.statement,
+            context.parameters,
+        )
+    
+        effective_parameters: Optional[_AnyExecuteParams]
+    
+        if not context.executemany:
+            effective_parameters = parameters[0]
+        else:
+            effective_parameters = parameters
+    
+        if self._has_events or self.engine._has_events:
+            for fn in self.dispatch.before_cursor_execute:
+                str_statement, effective_parameters = fn(
+                    self,
+                    cursor,
+                    str_statement,
+                    effective_parameters,
+                    context,
+                    context.executemany,
+                )
+    
+        if self._echo:
+            self._log_info(str_statement)
+    
+            stats = context._get_cache_stats()
+    
+            if not self.engine.hide_parameters:
+                self._log_info(
+                    "[%s] %r",
+                    stats,
+                    sql_util._repr_params(
+                        effective_parameters,
+                        batches=10,
+                        ismulti=context.executemany,
+                    ),
+                )
+            else:
+                self._log_info(
+                    "[%s] [SQL parameters hidden due to hide_parameters=True]",
+                    stats,
+                )
+    
+        evt_handled: bool = False
+        try:
+            if context.execute_style is ExecuteStyle.EXECUTEMANY:
+                effective_parameters = cast(
+                    "_CoreMultiExecuteParams", effective_parameters
+                )
+                if self.dialect._has_events:
+                    for fn in self.dialect.dispatch.do_executemany:
+                        if fn(
+                            cursor,
+                            str_statement,
+                            effective_parameters,
+                            context,
+                        ):
+                            evt_handled = True
+                            break
+                if not evt_handled:
+                    self.dialect.do_executemany(
+                        cursor,
+                        str_statement,
+                        effective_parameters,
+                        context,
+                    )
+            elif not effective_parameters and context.no_parameters:
+                if self.dialect._has_events:
+                    for fn in self.dialect.dispatch.do_execute_no_params:
+                        if fn(cursor, str_statement, context):
+                            evt_handled = True
+                            break
+                if not evt_handled:
+                    self.dialect.do_execute_no_params(
+                        cursor, str_statement, context
+                    )
+            else:
+                effective_parameters = cast(
+                    "_CoreSingleExecuteParams", effective_parameters
+                )
+                if self.dialect._has_events:
+                    for fn in self.dialect.dispatch.do_execute:
+                        if fn(
+                            cursor,
+                            str_statement,
+                            effective_parameters,
+                            context,
+                        ):
+                            evt_handled = True
+                            break
+                if not evt_handled:
+>                   self.dialect.do_execute(
+                        cursor, str_statement, effective_parameters, context
+                    )
+
+/opt/venv/lib/python3.11/site-packages/sqlalchemy/engine/base.py:1967: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+/opt/venv/lib/python3.11/site-packages/sqlalchemy/engine/default.py:952: in do_execute
+    cursor.execute(statement, parameters)
+/opt/venv/lib/python3.11/site-packages/sqlalchemy/dialects/postgresql/asyncpg.py:585: in execute
+    self._adapt_connection.await_(
+/opt/venv/lib/python3.11/site-packages/sqlalchemy/util/_concurrency_py3k.py:132: in await_only
+    return current.parent.switch(awaitable)  # type: ignore[no-any-return,attr-defined] # noqa: E501
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/opt/venv/lib/python3.11/site-packages/sqlalchemy/util/_concurrency_py3k.py:196: in greenlet_spawn
+    value = await result
+            ^^^^^^^^^^^^
+/opt/venv/lib/python3.11/site-packages/sqlalchemy/dialects/postgresql/asyncpg.py:563: in _prepare_and_execute
+    self._handle_exception(error)
+/opt/venv/lib/python3.11/site-packages/sqlalchemy/dialects/postgresql/asyncpg.py:513: in _handle_exception
+    self._adapt_connection._handle_exception(error)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <AdaptedConnection <asyncpg.connection.Connection object at 0x7e7f50449210>>
+error = UntranslatableCharacterError('unsupported Unicode escape sequence')
+
+    def _handle_exception(self, error):
+        if self._connection.is_closed():
+            self._transaction = None
+            self._started = False
+    
+        if not isinstance(error, AsyncAdapt_asyncpg_dbapi.Error):
+            exception_mapping = self.dbapi._asyncpg_error_translate
+    
+            for super_ in type(error).__mro__:
+                if super_ in exception_mapping:
+                    translated_error = exception_mapping[super_](
+                        "%s: %s" % (type(error), error)
+                    )
+                    translated_error.pgcode = translated_error.sqlstate = (
+                        getattr(error, "sqlstate", None)
+                    )
+>                   raise translated_error from error
+E                   sqlalchemy.dialects.postgresql.asyncpg.AsyncAdapt_asyncpg_dbapi.Error: <class 'asyncpg.exceptions.UntranslatableCharacterError'>: unsupported Unicode escape sequence
+E                   DETAIL:  \u0000 cannot be converted to text.
+
+/opt/venv/lib/python3.11/site-packages/sqlalchemy/dialects/postgresql/asyncpg.py:797: Error
+
+The above exception was the direct cause of the following exception:
+
+test_user_id = UUID('6c717f7d-3fce-4f17-a581-ea15957948ca')
+
+    @settings(max_examples=20, deadline=None)
+>   @given(
+            
+        operation=st.sampled_from(["create", "update", "delete"]),
+        entity_type=st.sampled_from(["problem_record", "session"]),
+        before_values=st.one_of(st.none(), st.dictionaries(st.text(min_size=1), st.text(min_size=1), max_size=3)),
+        after_values=st.one_of(st.none(), st.dictionaries(st.text(min_size=1), st.text(min_size=1), max_size=3))
+    )
+
+tests/integration/test_audit.py:46: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+/opt/venv/lib/python3.11/site-packages/pytest_asyncio/plugin.py:716: in inner
+    runner.run(coro, context=context)
+/usr/local/lib/python3.11/asyncio/runners.py:118: in run
+    return self._loop.run_until_complete(task)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/usr/local/lib/python3.11/asyncio/base_events.py:654: in run_until_complete
+    return future.result()
+           ^^^^^^^^^^^^^^^
+tests/integration/test_audit.py:60: in test_audit_log_integrity
+    log = await repo.create_audit_log(
+src/infrastructure/repositories/postgres_repository.py:95: in create_audit_log
+    await self.session.commit()
+/opt/venv/lib/python3.11/site-packages/sqlalchemy/ext/asyncio/session.py:1000: in commit
+    await greenlet_spawn(self.sync_session.commit)
+/opt/venv/lib/python3.11/site-packages/sqlalchemy/util/_concurrency_py3k.py:203: in greenlet_spawn
+    result = context.switch(value)
+             ^^^^^^^^^^^^^^^^^^^^^
+/opt/venv/lib/python3.11/site-packages/sqlalchemy/orm/session.py:2030: in commit
+    trans.commit(_to_root=True)
+<string>:2: in commit
+    ???
+/opt/venv/lib/python3.11/site-packages/sqlalchemy/orm/state_changes.py:137: in _go
+    ret_value = fn(self, *arg, **kw)
+                ^^^^^^^^^^^^^^^^^^^^
+/opt/venv/lib/python3.11/site-packages/sqlalchemy/orm/session.py:1311: in commit
+    self._prepare_impl()
+<string>:2: in _prepare_impl
+    ???
+/opt/venv/lib/python3.11/site-packages/sqlalchemy/orm/state_changes.py:137: in _go
+    ret_value = fn(self, *arg, **kw)
+                ^^^^^^^^^^^^^^^^^^^^
+/opt/venv/lib/python3.11/site-packages/sqlalchemy/orm/session.py:1286: in _prepare_impl
+    self.session.flush()
+/opt/venv/lib/python3.11/site-packages/sqlalchemy/orm/session.py:4331: in flush
+    self._flush(objects)
+/opt/venv/lib/python3.11/site-packages/sqlalchemy/orm/session.py:4466: in _flush
+    with util.safe_reraise():
+/opt/venv/lib/python3.11/site-packages/sqlalchemy/util/langhelpers.py:121: in __exit__
+    raise exc_value.with_traceback(exc_tb)
+/opt/venv/lib/python3.11/site-packages/sqlalchemy/orm/session.py:4427: in _flush
+    flush_context.execute()
+/opt/venv/lib/python3.11/site-packages/sqlalchemy/orm/unitofwork.py:466: in execute
+    rec.execute(self)
+/opt/venv/lib/python3.11/site-packages/sqlalchemy/orm/unitofwork.py:642: in execute
+    util.preloaded.orm_persistence.save_obj(
+/opt/venv/lib/python3.11/site-packages/sqlalchemy/orm/persistence.py:93: in save_obj
+    _emit_insert_statements(
+/opt/venv/lib/python3.11/site-packages/sqlalchemy/orm/persistence.py:1233: in _emit_insert_statements
+    result = connection.execute(
+/opt/venv/lib/python3.11/site-packages/sqlalchemy/engine/base.py:1419: in execute
+    return meth(
+/opt/venv/lib/python3.11/site-packages/sqlalchemy/sql/elements.py:527: in _execute_on_connection
+    return connection._execute_clauseelement(
+/opt/venv/lib/python3.11/site-packages/sqlalchemy/engine/base.py:1641: in _execute_clauseelement
+    ret = self._execute_context(
+/opt/venv/lib/python3.11/site-packages/sqlalchemy/engine/base.py:1846: in _execute_context
+    return self._exec_single_context(
+/opt/venv/lib/python3.11/site-packages/sqlalchemy/engine/base.py:1986: in _exec_single_context
+    self._handle_dbapi_exception(
+/opt/venv/lib/python3.11/site-packages/sqlalchemy/engine/base.py:2363: in _handle_dbapi_exception
+    raise sqlalchemy_exception.with_traceback(exc_info[2]) from e
+/opt/venv/lib/python3.11/site-packages/sqlalchemy/engine/base.py:1967: in _exec_single_context
+    self.dialect.do_execute(
+/opt/venv/lib/python3.11/site-packages/sqlalchemy/engine/default.py:952: in do_execute
+    cursor.execute(statement, parameters)
+/opt/venv/lib/python3.11/site-packages/sqlalchemy/dialects/postgresql/asyncpg.py:585: in execute
+    self._adapt_connection.await_(
+/opt/venv/lib/python3.11/site-packages/sqlalchemy/util/_concurrency_py3k.py:132: in await_only
+    return current.parent.switch(awaitable)  # type: ignore[no-any-return,attr-defined] # noqa: E501
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/opt/venv/lib/python3.11/site-packages/sqlalchemy/util/_concurrency_py3k.py:196: in greenlet_spawn
+    value = await result
+            ^^^^^^^^^^^^
+/opt/venv/lib/python3.11/site-packages/sqlalchemy/dialects/postgresql/asyncpg.py:563: in _prepare_and_execute
+    self._handle_exception(error)
+/opt/venv/lib/python3.11/site-packages/sqlalchemy/dialects/postgresql/asyncpg.py:513: in _handle_exception
+    self._adapt_connection._handle_exception(error)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <AdaptedConnection <asyncpg.connection.Connection object at 0x7e7f50449210>>
+error = UntranslatableCharacterError('unsupported Unicode escape sequence')
+
+    def _handle_exception(self, error):
+        if self._connection.is_closed():
+            self._transaction = None
+            self._started = False
+    
+        if not isinstance(error, AsyncAdapt_asyncpg_dbapi.Error):
+            exception_mapping = self.dbapi._asyncpg_error_translate
+    
+            for super_ in type(error).__mro__:
+                if super_ in exception_mapping:
+                    translated_error = exception_mapping[super_](
+                        "%s: %s" % (type(error), error)
+                    )
+                    translated_error.pgcode = translated_error.sqlstate = (
+                        getattr(error, "sqlstate", None)
+                    )
+>                   raise translated_error from error
+E                   sqlalchemy.exc.DBAPIError: (sqlalchemy.dialects.postgresql.asyncpg.Error) <class 'asyncpg.exceptions.UntranslatableCharacterError'>: unsupported Unicode escape sequence
+E                   DETAIL:  \u0000 cannot be converted to text.
+E                   [SQL: INSERT INTO audit_logs (id, user_id, operation, entity_type, entity_id, before_values, after_values, created_at) VALUES ($1::UUID, $2::UUID, $3::VARCHAR, $4::VARCHAR, $5::UUID, $6::JSONB, $7::JSONB, $8::TIMESTAMP WITHOUT TIME ZONE)]
+E                   [parameters: (UUID('16a4c443-14b9-4726-9f52-26f425321067'), UUID('6c717f7d-3fce-4f17-a581-ea15957948ca'), 'create', 'problem_record', UUID('cf30ccac-7fb4-4538-b067-b515272a2c93'), 'null', '{"0": "\\u0000"}', datetime.datetime(2026, 5, 11, 12, 23, 22, 810698))]
+E                   (Background on this error at: https://sqlalche.me/e/20/dbapi)
+E                   Falsifying example: test_audit_log_integrity(
+E                       test_user_id=UUID('6c717f7d-3fce-4f17-a581-ea15957948ca'),
+E                       operation='create',
+E                       entity_type='problem_record',
+E                       before_values=None,
+E                       after_values={'0': '\x00'},
+E                   )
+
+/opt/venv/lib/python3.11/site-packages/sqlalchemy/dialects/postgresql/asyncpg.py:797: DBAPIError
+=========================== short test summary info ============================
+FAILED tests/integration/test_audit.py::test_audit_log_integrity - sqlalchemy...
+============================== 1 failed in 2.20s ===============================

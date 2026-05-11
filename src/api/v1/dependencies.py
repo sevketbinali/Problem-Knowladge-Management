@@ -6,9 +6,10 @@ from fastapi.security import OAuth2PasswordBearer
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.core.auth import decode_access_token
-from src.infrastructure.database import async_session
+from src.infrastructure.database import AsyncSessionLocal
 from src.infrastructure.models import User
 from src.infrastructure.repositories.postgres_repository import PostgreSQLRepository
+from src.infrastructure.services.redis_service import RedisService
 
 # OAuth2 scheme for token extraction
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/api/v1/auth/login")
@@ -16,7 +17,7 @@ oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/api/v1/auth/login")
 
 async def get_db() -> AsyncGenerator[AsyncSession, None]:
     """Dependency to provide an asynchronous database session."""
-    async with async_session() as session:
+    async with AsyncSessionLocal() as session:
         yield session
 
 
@@ -54,7 +55,6 @@ async def get_current_user(
 async def get_current_active_user(
     current_user: User = Depends(get_current_user)
 ) -> User:
-    """Dependency to ensure the current user is active (could add active check if needed)."""
     # For now, all users are active
     return current_user
 
@@ -69,3 +69,25 @@ async def get_admin_user(
             detail="The user does not have enough privileges"
         )
     return current_user
+
+
+async def get_redis() -> AsyncGenerator[RedisService, None]:
+    """Dependency to provide a Redis service."""
+    service = RedisService()
+    try:
+        yield service
+    finally:
+        await service.close()
+
+
+async def check_rate_limit(
+    current_user: User = Depends(get_current_active_user),
+    redis_service: RedisService = Depends(get_redis)
+):
+    """Dependency to enforce rate limiting per user."""
+    allowed = await redis_service.check_rate_limit(str(current_user.id))
+    if not allowed:
+        raise HTTPException(
+            status_code=status.HTTP_429_TOO_MANY_REQUESTS,
+            detail="Rate limit exceeded. Please try again later."
+        )

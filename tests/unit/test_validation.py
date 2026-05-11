@@ -10,7 +10,9 @@ from src.core.validators import (
     validate_step_response,
     validate_search_query,
     validate_lessons_learned,
-    validate_ishikawa_cause
+    validate_ishikawa_cause,
+    validate_ishikawa_structure,
+    validate_why_chain
 )
 
 
@@ -67,3 +69,25 @@ def test_ishikawa_cause_validation(text: str) -> None:
     else:
         with pytest.raises(ValueError):
             validate_ishikawa_cause(text)
+
+
+@given(st.dictionaries(st.text(), st.text()))
+def test_ishikawa_structure_validation(data: dict) -> None:
+    """Property 11.2: Ishikawa structure validation."""
+    required = {"Human", "Machine", "Material", "Method", "Measurement", "Environment"}
+    if required.issubset(data.keys()):
+        validate_ishikawa_structure(data)
+    else:
+        with pytest.raises(ValueError):
+            validate_ishikawa_structure(data)
+
+
+@given(st.lists(st.text()))
+def test_why_chain_validation(chain: list) -> None:
+    """Property 11.3: Why chain length validation (exactly 5)."""
+    if len(chain) == 5:
+        validate_why_chain(chain)
+    else:
+        with pytest.raises(ValueError):
+            validate_why_chain(chain)
+

@@ -35,3 +35,18 @@ def validate_ishikawa_cause(text: str) -> None:
     length = len(text)
     if not (1 <= length <= 500):
         raise ValueError(f"Ishikawa cause must be between 1 and 500 characters. Got {length}.")
+
+
+def validate_ishikawa_structure(data: dict) -> None:
+    """Requirement 11.2: Validate Ishikawa structural components."""
+    required_categories = {"Human", "Machine", "Material", "Method", "Measurement", "Environment"}
+    missing = required_categories - set(data.keys())
+    if missing:
+        raise ValueError(f"Ishikawa diagram missing categories: {missing}")
+
+
+def validate_why_chain(chain: list) -> None:
+    """Requirement 11.3: Validate Why chain length."""
+    if len(chain) != 5:
+        raise ValueError(f"Why chain must have exactly 5 steps. Got {len(chain)}.")
+

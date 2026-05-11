@@ -27,19 +27,19 @@ Bu plan, FastAPI + PostgreSQL + Qdrant + Redis + Celery mimarisi üzerine inşa 
     - Doğrulama: Her modeli geçerli ve geçersiz verilerle örnekle; Pydantic `ValidationError` beklenen alanlarda fırlatılmalı
     - _Gereksinimler: 6.1, 11.2, 13.1_
 
-  - [ ]* 2.2 Özellik 30 için property testi yaz — Serileştirme round-trip
+  - [x] 2.2 Özellik 30 için property testi yaz — Serileştirme round-trip
     - **Özellik 30: Problem Kaydı Serileştirme Round-Trip**
     - `st.builds(ProblemRecord, ...)` stratejisiyle herhangi bir geçerli `ProblemRecord` nesnesi P için: `P == parse(serialize(P))` alan bazında değer ve tür eşitliği
     - Doğrulama: `pytest tests/unit/test_serialization.py::test_roundtrip` geçmeli
     - **Doğrular: Gereksinim 13.4**
 
-  - [ ]* 2.3 Özellik 31 için property testi yaz — JSON şema uygunluğu
+  - [x] 2.3 Özellik 31 için property testi yaz — JSON şema uygunluğu
     - **Özellik 31: Serileştirme JSON Şema Uygunluğu**
     - `st.builds(ProblemRecord, ...)` stratejisiyle üretilen her JSON belgesi `ProblemRecord` JSON şemasına uygun olmalı
     - Doğrulama: `pytest tests/unit/test_serialization.py::test_schema_compliance` geçmeli
     - **Doğrular: Gereksinim 13.1**
 
-  - [ ]* 2.4 Özellik 32 için property testi yaz — Ayrıştırma alan eşleşmesi
+  - [x] 2.4 Özellik 32 için property testi yaz — Ayrıştırma alan eşleşmesi
     - **Özellik 32: Ayrıştırma Alan Eşleşmesi**
     - Geçerli her JSON belgesi için ayrıştırılan nesnenin tüm alanları kaynak JSON ile değer ve tür olarak eşleşmeli
     - Doğrulama: `pytest tests/unit/test_serialization.py::test_parse_field_match` geçmeli
@@ -82,7 +82,7 @@ Bu plan, FastAPI + PostgreSQL + Qdrant + Redis + Celery mimarisi üzerine inşa 
     - Doğrulama: Her metod için birim testi: geçerli girdi → beklenen dönüş; kayıt bulunamadığında `None` veya exception
     - _Gereksinimler: 6.1, 9.1, 9.2, 9.3, 9.4, 9.5_
 
-  - [ ]* 4.3 Özellik 23 için property testi yaz — Denetim logu bütünlüğü
+  - [x] 4.3 Özellik 23 için property testi yaz — Denetim logu bütünlüğü
     - **Özellik 23: Denetim Logu Bütünlüğü**
     - `st.sampled_from(["create","update","delete"])` stratejisiyle her işlem için: kullanıcı ID, zaman damgası, işlem türü ve önceki/sonraki değerler audit log kaydında bulunmalı
     - Doğrulama: `pytest tests/integration/test_audit.py::test_audit_log_integrity` geçmeli
@@ -313,19 +313,19 @@ Bu plan, FastAPI + PostgreSQL + Qdrant + Redis + Celery mimarisi üzerine inşa 
     - Doğrulama: `pytest tests/unit/test_lessons.py::test_lessons_structural_components` geçmeli
     - **Doğrular: Gereksinim 7.4**
 
-- [ ] 15. Embedding ve Qdrant altyapısını uygula
-  - [~] 15.1 `EmbeddingService` sınıfını yaz
+- [x] 15. Embedding ve Qdrant altyapısını uygula
+  - [x] 15.1 `EmbeddingService` sınıfını yaz
     - `generate_embedding` ve `generate_batch_embeddings` metodlarını uygula (Gemini `text-embedding-004`, 768 boyut)
     - Doğrulama: Geçerli metin → 768 boyutlu float listesi döner; Gemini API mock ile test et
     - _Gereksinimler: 6.2_
 
-  - [~] 15.2 `QdrantRepository` sınıfını yaz
+  - [x] 15.2 `QdrantRepository` sınıfını yaz
     - `index_record`, `search_similar`, `update_record`, `delete_record` metodlarını uygula
     - Koleksiyon: `problem_records`; vektör boyutu: 768; mesafe: Cosine; HNSW: m=16, ef_construct=100
     - Doğrulama: Kayıt ekle → arama ile geri bul; silinen kayıt → arama sonuçlarında görünmemeli
     - _Gereksinimler: 6.2, 8.1_
 
-  - [~] 15.3 Embedding yeniden deneme kuyruğunu uygula (Celery)
+  - [x] 15.3 Embedding yeniden deneme kuyruğunu uygula (Celery)
     - `EMBEDDING_QUEUE` tablosuna ekle; Celery worker 30 saniye aralıklarla en fazla 3 kez yeniden dener; 3 başarısız denemeden sonra `embedding-failed` olarak işaretle ve Admin'e bildirim gönder
     - Doğrulama: 3 başarısız deneme sonrası kayıt durumu `embedding-failed` olmalı; 4. deneme yapılmamalı
     - _Gereksinimler: 6.4_
@@ -336,14 +336,14 @@ Bu plan, FastAPI + PostgreSQL + Qdrant + Redis + Celery mimarisi üzerine inşa 
     - Doğrulama: `pytest tests/integration/test_embedding.py::test_embedding_retry_limit` geçmeli
     - **Doğrular: Gereksinim 6.4**
 
-- [ ] 16. RAG motorunu uygula
+- [x] 16. RAG motorunu uygula
   - [~] 16.1 `RAGEngine` sınıfını yaz
     - `search_similar`, `index_record`, `update_record`, `delete_record` metodlarını uygula
     - Arama sonuçları anlamsal benzerlik skoruna göre azalan sırada; en fazla 10 sonuç; 0.5 altı skor → sonuç döndürülmez
     - Doğrulama: 10 kayıt ekle → arama → sonuçlar azalan sırada; 11. sonuç döndürülmemeli; 0.5 altı skor → boş liste
     - _Gereksinimler: 8.1, 8.2, 8.6_
 
-  - [~] 16.2 Arama filtresi mantığını uygula
+  - [x] 16.2 Arama filtresi mantığını uygula
     - Sektör, departman, metodoloji, tarih aralığı ve çözüm durumu filtrelerini Qdrant payload filtreleme ile uygula
     - Doğrulama: Filtre uygulandığında dönen tüm sonuçlar filtre kriterlerini karşılamalı; filtre dışı kayıt döndürülmemeli
     - _Gereksinimler: 8.5_
@@ -366,7 +366,7 @@ Bu plan, FastAPI + PostgreSQL + Qdrant + Redis + Celery mimarisi üzerine inşa 
     - Doğrulama: `pytest tests/integration/test_search.py::test_search_result_field_completeness` geçmeli
     - **Doğrular: Gereksinim 8.3**
 
-- [ ] 17. Redis önbellek ve rate limiting altyapısını uygula
+- [x] 17. Redis önbellek ve rate limiting altyapısını uygula
   - [~] 17.1 `RedisRepository` sınıfını yaz
     - Arama sonuçları önbelleği (TTL: 300 saniye) ve rate limiting sayaçları (pencere: 60 saniye) için metodları uygula
     - Doğrulama: Aynı sorgu 300 saniye içinde tekrarlandığında önbellekten dönmeli; 301. saniyede yeni sorgu yapılmalı
@@ -393,7 +393,7 @@ Bu plan, FastAPI + PostgreSQL + Qdrant + Redis + Celery mimarisi üzerine inşa 
   - `pytest tests/integration/ -v` geçmeli
   - Soru varsa kullanıcıya sor.
 
-- [ ] 19. Oturum yönetimi servisini uygula
+- [x] 19. Oturum yönetimi servisini uygula
   - [~] 19.1 `SessionService` sınıfını yaz
     - `create_session`, `get_session`, `submit_step_response`, `go_back_step`, `finalize_session`, `get_session_history` metodlarını uygula
     - `create_session`: oturum oluşturulduğunda benzersiz UUID ata; RAG motoru ile benzer kayıtları sorgula (en fazla 5 sonuç)
@@ -407,7 +407,7 @@ Bu plan, FastAPI + PostgreSQL + Qdrant + Redis + Celery mimarisi üzerine inşa 
     - Doğrulama: `pytest tests/unit/test_session.py::test_session_id_uniqueness` geçmeli
     - **Doğrular: Gereksinim 1.5**
 
-- [ ] 20. Problem kaydı servisini uygula
+- [x] 20. Problem kaydı servisini uygula
   - [~] 20.1 `KnowledgeService` sınıfını yaz
     - `create_record`, `get_record`, `update_record`, `delete_record`, `list_records`, `search_records` metodlarını uygula
     - `create_record`: oturum finalize edildiğinde zorunlu alanların tamamını içeren kayıt oluştur; embedding kuyruğuna ekle
@@ -439,7 +439,7 @@ Bu plan, FastAPI + PostgreSQL + Qdrant + Redis + Celery mimarisi üzerine inşa 
     - Doğrulama: `pytest tests/unit/test_pagination.py::test_pagination_size_limits` geçmeli
     - **Doğrular: Gereksinim 9.1**
 
-- [ ] 21. FastAPI router'larını uygula
+- [x] 21. FastAPI router'larını uygula
   - [~] 21.1 `auth_router` endpoint'lerini yaz
     - `POST /api/v1/auth/login`, `POST /api/v1/auth/refresh`, `POST /api/v1/auth/logout` endpoint'lerini uygula
     - Doğrulama: Geçerli kimlik bilgileri → JWT token döner; geçersiz → 401; token yenileme → yeni token döner
@@ -484,7 +484,7 @@ Bu plan, FastAPI + PostgreSQL + Qdrant + Redis + Celery mimarisi üzerine inşa 
   - `pytest tests/integration/test_api.py -v` geçmeli
   - Soru varsa kullanıcıya sor.
 
-- [ ] 23. Degraded mode ve hata stratejilerini uygula
+- [x] 23. Degraded mode ve hata stratejilerini uygula
   - [~] 23.1 Qdrant bağlantı başarısızlığı degraded mode'unu uygula
     - 10 saniye içinde 3 ardışık bağlantı hatası → degraded mode; anlamsal arama istekleri 503 döner; yeni oturumlar oluşturulabilir
     - Bağlantı yeniden sağlandığında otomatik normal moda geç

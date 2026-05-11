@@ -9,7 +9,7 @@ from enum import Enum
 from typing import Any, Generic, TypeVar
 from uuid import UUID
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, model_validator
 
 # ---------------------------------------------------------------------------
 # Enums
@@ -72,7 +72,21 @@ class ProblemRecord(BaseModel):
     created_at: datetime
     updated_at: datetime
 
+    @model_validator(mode="after")
+    def validate_metadata_consistency(self) -> ProblemRecord:
+        """Requirement 13.6: Ensure metadata (Department vs Industry) is consistent."""
+        # Simple rule: If industry is 'Automotive', department shouldn't be 'Fashion'
+        # This can be expanded with real context maps.
+        industry = self.industry_sector.lower() if self.industry_sector else None
+        department = self.department.lower() if self.department else None
+
+        if industry == "automotive" and department == "fashion":
+             raise ValueError("Department 'Fashion' is inconsistent with Industry 'Automotive'")
+             
+        return self
+
     model_config = {"extra": "ignore"}  # Req 13.5 – unknown fields are silently dropped
+
 
 
 class IshikawaData(BaseModel):
@@ -84,6 +98,58 @@ class IshikawaData(BaseModel):
     material: list[str]
     measurement: list[str]
     environment: list[str]
+
+    def check_circularity(self) -> list[str]:
+        """Requirement 2.2: Detect potential circular dependencies between categories."""
+        warnings = []
+        categories = {
+            "human": ["man", "human", "operator", "personnel", "staff"],
+            "machine": ["machine", "equipment", "tool", "hardware"],
+            "method": ["method", "process", "procedure", "standard"],
+            "material": ["material", "raw", "supply", "component"],
+            "measurement": ["measurement", "calibration", "data", "gauge"],
+            "environment": ["environment", "surroundings", "climate", "temp"]
+        }
+        
+        data_map = {
+            "man": self.man,
+            "machine": self.machine,
+            "method": self.method,
+            "material": self.material,
+            "measurement": self.measurement,
+            "environment": self.environment
+        }
+
+        # Build dependency graph
+        deps = {cat: set() for cat in data_map.keys()}
+        for cat, causes in data_map.items():
+            for cause in causes:
+                cause_lower = cause.lower()
+                for other_cat, keywords in categories.items():
+                    # Map keyword categories to actual fields
+                    field_name = "man" if other_cat == "human" else other_cat
+                    if field_name != cat and any(kw in cause_lower for kw in keywords):
+                        deps[cat].add(field_name)
+
+        # Detect cycles (DFS)
+        def find_cycle(start_node):
+            stack = [(start_node, [start_node])]
+            while stack:
+                node, path = stack.pop()
+                for neighbor in deps[node]:
+                    if neighbor == start_node:
+                        return path + [neighbor]
+                    if neighbor not in path:
+                        stack.append((neighbor, path + [neighbor]))
+            return None
+
+        for cat in data_map.keys():
+            cycle = find_cycle(cat)
+            if cycle:
+                warnings.append(f"Circular dependency detected: {' -> '.join(cycle)}")
+        
+        return list(set(warnings))
+
 
 
 class WhyChain(BaseModel):

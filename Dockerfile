@@ -18,7 +18,7 @@ COPY pyproject.toml ./
 RUN python -m venv /opt/venv
 ENV PATH="/opt/venv/bin:$PATH"
 RUN pip install --no-cache-dir --upgrade pip && \
-    pip install --no-cache-dir -e .
+    pip install --no-cache-dir -e ".[dev]"
 
 # ── Stage 2: Runtime ──────────────────────────────────────────────────────────
 FROM python:3.11-slim

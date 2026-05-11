@@ -89,3 +89,12 @@ class QdrantRepository:
     async def update_record(self, record_id: uuid.UUID, vector: List[float], payload: Dict[str, Any]):
         """Update a record in Qdrant (same as upsert)."""
         await self.index_record(record_id, vector, payload)
+
+    async def is_healthy(self) -> bool:
+        """Requirement 23.1: Check if Qdrant is reachable."""
+        try:
+            await self.client.get_collections()
+            return True
+        except Exception:
+            return False
+

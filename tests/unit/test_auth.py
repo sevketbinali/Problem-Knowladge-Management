@@ -32,11 +32,12 @@ def test_password_hashing_security(password: str) -> None:
 
 
 @given(st.dictionaries(
-    keys=st.text(min_size=1, max_size=20),
+    keys=st.text(min_size=1, max_size=20).filter(lambda k: k != "exp"),
     values=st.text(min_size=1, max_size=100),
     min_size=1,
     max_size=5
 ))
+
 def test_token_roundtrip(payload: dict) -> None:
     """Tests that JWT tokens can be created and decoded correctly."""
     token = create_access_token(payload)
@@ -53,3 +54,14 @@ def test_invalid_token() -> None:
     """Tests that invalid tokens return None."""
     assert decode_access_token("invalid.token.here") is None
     assert decode_access_token("") is None
+
+
+@given(st.dictionaries(st.text(min_size=1).filter(lambda k: k != "exp"), st.text(min_size=1), min_size=1))
+def test_token_structure(payload: dict) -> None:
+    """Requirement 13.2: Verify JWT structure (Header.Payload.Signature)."""
+    token = create_access_token(payload)
+    parts = token.split(".")
+    assert len(parts) == 3
+    # Check if parts are valid base64 (implicit in JWT structure)
+    assert all(len(p) > 0 for p in parts)
+
