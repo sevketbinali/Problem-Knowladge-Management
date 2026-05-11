@@ -1,0 +1,27 @@
+# Use official Python 3.11 slim image
+FROM python:3.11-slim
+
+# Set working directory
+WORKDIR /app
+
+# Prevent Python from writing pyc files and enable unbuffered logging
+ENV PYTHONDONTWRITEBYTECODE=1
+ENV PYTHONUNBUFFERED=1
+
+# Install dependencies
+# We only need streamlit and requests for the frontend
+RUN pip install --no-cache-dir streamlit requests
+
+# Copy the frontend code
+# Note: We copy the src folder so we can run src/frontend/app.py
+COPY src/ src/
+
+# Expose Streamlit's default port
+EXPOSE 8501
+
+# Healthcheck for Streamlit
+HEALTHCHECK CMD curl --fail http://localhost:8501/_stcore/health
+
+# Command to run Streamlit
+# We use --server.address 0.0.0.0 to make it accessible outside the container
+CMD ["streamlit", "run", "src/frontend/app.py", "--server.port=8501", "--server.address=0.0.0.0"]

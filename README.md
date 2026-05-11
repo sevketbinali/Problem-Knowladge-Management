@@ -63,18 +63,27 @@ cp .env.example .env
 # Gemini API anahtarınızı dosyaya eklemeyi unutmayın!
 ```
 
-### 2. Altyapıyı Başlat (Docker)
-Backend ve veritabanlarını tek komutla çalıştırın:
+### 2. Sistemi Başlat (Docker)
+Tüm servisleri (API, Arayüz, Veritabanları) tek bir komutla ayağa kaldırın:
 ```bash
 docker-compose up -d --build
 ```
 
-### 3. Arayüzü Başlat (Streamlit)
-Lokalinizde Python paketlerini yükleyip arayüzü açın:
-```bash
-pip install streamlit requests
-streamlit run src/frontend/app.py
-```
+*Not: Bu işlem ilk seferinde gerekli imajları indireceği için internet hızınıza bağlı olarak 1-2 dakika sürebilir.*
+
+Sistem ayağa kalktığında:
+- **Arayüz (Streamlit):** [http://localhost:8501](http://localhost:8501)
+- **API (FastAPI):** [http://localhost:8000](http://localhost:8000)
+- **API Dökümantasyonu:** [http://localhost:8000/docs](http://localhost:8000/docs)
+
+adreslerinden erişilebilir olacaktır.
+
+---
+
+### 🔑 Giriş Bilgileri
+Sistem ayağa kalkarken **otomatik olarak şu Admin hesabını tanımlayacaktır:**
+* **E-mail:** `admin@pkm.local`
+* **Şifre:** `Admin123!`
 
 ---
 
@@ -109,7 +118,3 @@ streamlit run src/frontend/app.py
 5. Bir Pull Request açın.
 
 ---
-
-<div align="center">
-    Built with ❤️ by Antigravity AI
-</div>
