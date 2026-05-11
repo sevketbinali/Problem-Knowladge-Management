@@ -43,6 +43,7 @@ class Session(Base):
     status: Mapped[str] = mapped_column(String, default="active")
     step_responses: Mapped[dict[str, Any]] = mapped_column(JSONB, default=dict)
     current_step_index: Mapped[int] = mapped_column(Integer, default=0)
+    followup_count: Mapped[int] = mapped_column(Integer, default=0)
     created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
     updated_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
 
@@ -69,7 +70,9 @@ class ProblemRecord(Base):
     resolution_status: Mapped[str] = mapped_column(String, nullable=False)
     resolution_date: Mapped[datetime | None] = mapped_column(DateTime, nullable=True)
     embedding_status: Mapped[str] = mapped_column(String, default="pending")
+    meta_data: Mapped[dict[str, Any] | None] = mapped_column(JSONB, nullable=True)
     created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
+
     updated_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
 
     user = relationship("User", back_populates="problem_records")

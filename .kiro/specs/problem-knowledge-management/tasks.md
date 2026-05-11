@@ -149,7 +149,7 @@ Bu plan, FastAPI + PostgreSQL + Qdrant + Redis + Celery mimarisi üzerine inşa 
     - Doğrulama: 9 karakter → hata; 10 karakter → geçer; 500 karakter → geçer; 501 karakter → hata
     - _Gereksinimler: 8.1, 8.7_
 
-  - [ ]* 7.6 Özellik 19 için property testi yaz — Arama sonuçları sıralama ve sayı sınırı
+  - [x] 7.6 Özellik 19 için property testi yaz — Arama sonuçları sıralama ve sayı sınırı
     - **Özellik 19: Arama Sonuçları Sıralama ve Sayı Sınırı**
     - `st.text(min_size=0, max_size=600)` stratejisiyle: 10–500 arası sorgu → sonuçlar azalan sırada ve ≤10; <10 karakter → `ValidationError`
     - Doğrulama: `pytest tests/integration/test_search.py::test_search_ordering_and_limit` geçmeli
@@ -160,25 +160,27 @@ Bu plan, FastAPI + PostgreSQL + Qdrant + Redis + Celery mimarisi üzerine inşa 
     - Doğrulama: 99 kelime → hata; 100 kelime → geçer; 500 kelime → geçer; 501 kelime → hata
     - _Gereksinimler: 7.1, 7.3_
 
-  - [ ]* 7.8 Özellik 17 için property testi yaz — Lessons Learned kelime sayısı doğrulaması
+  - [x] 7.8 Özellik 17 için property testi yaz — Lessons Learned kelime sayısı doğrulaması
     - **Özellik 17: Lessons Learned Kelime Sayısı Doğrulaması**
     - `st.text()` stratejisiyle: 100–500 kelime → kabul; dışarısı → reddedilir
-    - Doğrulama: `pytest tests/unit/test_lessons.py::test_lessons_word_count` geçmeli
+    - Doğrulama: `pytest tests/unit/test_validation.py::test_lessons_learned_word_count` geçmeli
     - **Doğrular: Gereksinim 7.1, 7.3**
 
-  - [~] 7.9 Ishikawa kategori yanıtı doğrulayıcısını yaz
+  - [x] 7.9 Ishikawa kategori yanıtı doğrulayıcısını yaz
+
     - `validate_ishikawa_cause(text: str) -> None` fonksiyonu: 1–500 karakter geçerli; boş veya >500 → `ValidationError`
     - Doğrulama: boş string → hata; 1 karakter → geçer; 500 karakter → geçer; 501 karakter → hata
     - _Gereksinimler: 3.2_
 
-  - [ ]* 7.10 Özellik 8 için property testi yaz — Ishikawa kategori yanıtı doğrulaması
+  - [x] 7.10 Özellik 8 için property testi yaz — Ishikawa kategori yanıtı doğrulaması
     - **Özellik 8: Ishikawa Kategori Yanıtı Doğrulaması**
     - `st.text(min_size=0, max_size=600)` stratejisiyle: 1–500 karakter → kabul; boş veya >500 → reddedilir
-    - Doğrulama: `pytest tests/unit/test_ishikawa.py::test_ishikawa_category_validation` geçmeli
+    - Doğrulama: `pytest tests/unit/test_validation.py::test_ishikawa_cause_validation` geçmeli
+
     - **Doğrular: Gereksinim 3.2**
 
-- [~] 8. Kontrol noktası — Doğrulama katmanı
-  - `pytest tests/unit/test_validation.py tests/unit/test_lessons.py tests/unit/test_ishikawa.py -v` geçmeli
+- [x] 8. Kontrol noktası — Doğrulama katmanı
+  - `pytest tests/unit/test_validation.py -v` geçmeli
   - Soru varsa kullanıcıya sor.
 
 

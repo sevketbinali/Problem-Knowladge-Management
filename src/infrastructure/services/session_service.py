@@ -2,8 +2,7 @@
 import uuid
 from typing import Any, Dict, List, Optional
 
-from src.domain.methodologies import MethodologyEngine
-from src.domain.models import MethodologyType
+from src.core.methodology import MethodologyEngine, MethodologyType
 from src.infrastructure.repositories.postgres_repository import PostgreSQLRepository
 from src.infrastructure.services.llm_service import LLMService
 
@@ -32,13 +31,13 @@ class SessionService:
         )
         
         template = self.engine.get_template(m_type)
-        first_step_prompt = template.get_step_prompt(0)
+        first_step = self.engine.get_step(m_type, 0)
         
         return {
             "session_id": str(db_session.id),
             "methodology": methodology,
             "current_step": 0,
-            "next_prompt": first_step_prompt,
+            "next_prompt": first_step.question if first_step else None,
             "total_steps": len(template.steps)
         }
 
@@ -55,17 +54,41 @@ class SessionService:
         current_responses = db_session.step_responses or {}
         current_responses[str(db_session.current_step_index)] = response
         
-        # Increment step
-        next_step_index = db_session.current_step_index + 1
+        # Requirement 2.3: Handle followup questions
+        # This logic would normally call LLM, but here we prepare for the state
+        # In the actual implementation, submit_step_response might decide to 
+        # either move to next step OR ask a followup if the response is vague.
         
-        # Update DB
+        # For now, let's assume if response is < 20 chars, we ask followup (just for logic demonstration)
+        needs_clarification = len(response) < 20 and db_session.followup_count < 3
+        
+        if needs_clarification:
+            new_followup_count = db_session.followup_count + 1
+            await self.repository.update_session(session_id, followup_count=new_followup_count)
+            
+            # Get followup from LLM
+            followup_q = await self.llm.generate_clarification(response)
+            
+            return {
+                "session_id": str(session_id),
+                "current_step": db_session.current_step_index,
+                "next_prompt": followup_q,
+                "followup_count": new_followup_count,
+                "can_proceed": new_followup_count >= 3,
+                "status": "active"
+            }
+
+        # If no clarification needed or max followups reached, move to next step
+        next_step_index = db_session.current_step_index + 1
+        is_complete = self.engine.is_complete(m_type, next_step_index)
+        
+        # Reset followup count for next step
         update_data = {
             "step_responses": current_responses,
-            "current_step_index": next_step_index
+            "current_step_index": next_step_index,
+            "followup_count": 0
         }
         
-        # Requirement 19.1: Check if complete
-        is_complete = next_step_index >= len(template.steps)
         if is_complete:
             update_data["status"] = "completed"
         
@@ -75,15 +98,16 @@ class SessionService:
             return {
                 "session_id": str(session_id),
                 "status": "completed",
-                "message": "Methodoloji tamamlandı. Analiz raporu oluşturulabilir."
+                "message": "Metodoloji tamamlandı. Analiz raporu oluşturulabilir."
             }
         
-        next_prompt = template.get_step_prompt(next_step_index)
+        next_step = self.engine.get_step(m_type, next_step_index)
         
         return {
             "session_id": str(session_id),
             "current_step": next_step_index,
-            "next_prompt": next_prompt,
+            "next_prompt": next_step.question if next_step else None,
+            "followup_count": 0,
             "status": "active"
         }
 

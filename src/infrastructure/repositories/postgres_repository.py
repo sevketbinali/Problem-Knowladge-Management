@@ -79,6 +79,20 @@ class PostgreSQLRepository:
         result = await self.session.execute(select(ProblemRecord).offset(skip).limit(limit))
         return result.scalars().all()
 
+    async def search_records(self, query: str, limit: int = 10) -> Sequence[ProblemRecord]:
+        """Requirement 8.1, 8.2: Search records by title or description."""
+        stmt = (
+            select(ProblemRecord)
+            .where(
+                (ProblemRecord.title.ilike(f"%{query}%")) |
+                (ProblemRecord.problem_description.ilike(f"%{query}%"))
+            )
+            .order_by(ProblemRecord.created_at.desc())
+            .limit(limit)
+        )
+        result = await self.session.execute(stmt)
+        return result.scalars().all()
+
     # Audit Logs
     async def create_audit_log(self, user_id: uuid.UUID, operation: str, entity_type: str, entity_id: uuid.UUID, 
                              before_values: dict[str, Any] | None = None, 
