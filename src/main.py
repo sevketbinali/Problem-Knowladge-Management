@@ -3,6 +3,7 @@ from contextlib import asynccontextmanager
 
 from fastapi import FastAPI, Request
 from fastapi.responses import JSONResponse
+from fastapi.middleware.cors import CORSMiddleware
 from starlette.exceptions import HTTPException as StarletteHTTPException
 
 from src.api.v1.analysis import router as analysis_router
@@ -28,6 +29,15 @@ app = FastAPI(
     description="AI-destekli Problem Bilgi Yönetim Sistemi",
     version="0.1.0",
     lifespan=lifespan,
+)
+
+# CORS Middleware - Allow Next.js frontend
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["http://localhost:3000"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
 )
 
 # Exception Handlers (Task 21.6)
