@@ -15,7 +15,7 @@ class Settings:
     RATE_LIMIT_PER_MINUTE: int = 10
     GEMINI_API_KEY: str
     GEMINI_MODEL: str = "gemini-3-flash-preview"
-    EMBEDDING_MODEL: str = "text-embedding-004"
+    EMBEDDING_MODEL: str = "models/text-embedding-004"
     EMBEDDING_DIMENSION: int = 768
     JWT_SECRET: str
     JWT_ALGORITHM: str = "HS256"

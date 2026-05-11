@@ -45,16 +45,21 @@ class LLMService:
         result = await self._generate(prompt, timeout=3)
         return result or "Bu durumun kök nedeni nedir?"
 
-    async def generate_lessons_learned(self, session_data: dict) -> str:
+    async def generate_lessons_learned(self, problem_description: str, root_cause: str, methodology: str) -> str:
         """Generate 'Lessons Learned' summary from session data."""
-        prompt = f"Aşağıdaki problem çözüm oturumundan çıkarılan dersleri özetle (100-500 kelime):\n\n{str(session_data)}"
+        prompt = (
+            f"Problem: {problem_description}\n"
+            f"Kök Neden: {root_cause}\n"
+            f"Metodoloji: {methodology}\n\n"
+            f"Yukarıdaki problem çözüm sürecinden çıkarılan kurumsal dersleri (Lessons Learned) özetle. "
+            f"Gelecekte benzer durumların yaşanmaması için öneriler sun. (100-300 kelime)"
+        )
         result = await self._generate(prompt, timeout=15)
         
         # Requirement 14.2: Structural component check
         if not result:
             return "Kök Neden: [Placeholder]\nDüzeltici Eylemler: [Placeholder]\nSonuç: [Placeholder]\nÖnleyici Öneriler: [Placeholder]"
         
-        # We could add more complex logic here to check for specific headers/components.
         return result
 
     async def suggest_category_reassignment(self, cause: str, current_category: str) -> Optional[str]:
@@ -82,3 +87,24 @@ class LLMService:
         )
         result = await self._generate(prompt, timeout=5)
         return "BELİRSİZ" in result.upper()
+
+    async def suggest_completion_details(self, problem_description: str, step_responses: dict) -> Dict[str, Any]:
+        """Suggest department, summary, and tags using JSON output."""
+        prompt = (
+            f"Problem: {problem_description}\n"
+            f"Analiz Detayları: {str(step_responses)}\n\n"
+            f"Bu problem için en uygun:\n"
+            f"1. Departman (Üretim, Lojistik, Kalite, Bilgi İşlem, Finans seçeneklerinden biri)\n"
+            f"2. Kısa ve vurucu bir özet başlık (maksimum 10 kelime)\n"
+            f"3. 4-5 adet anahtar kelime (tags)\n\n"
+            f"Yanıtı şu JSON formatında ver: "
+            f"{{\"department\": \"...\", \"summary\": \"...\", \"tags\": [\"tag1\", \"tag2\", ...]}}"
+        )
+        result = await self._generate_json(prompt)
+        if not result:
+            return {
+                "department": "Üretim",
+                "summary": f"Problem: {problem_description[:30]}...",
+                "tags": ["problem", "analiz"]
+            }
+        return result

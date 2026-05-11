@@ -109,16 +109,32 @@ async def step_back(
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e))
 
+@router.get("/{session_id}/suggestions", response_model=APIResponse[dict])
+async def get_session_completion_suggestions(
+    session_id: uuid.UUID,
+    current_user: User = Depends(get_current_active_user),
+    service: SessionService = Depends(get_session_service)
+):
+    """Suggest department and summary before finalization."""
+    try:
+        result = await service.get_completion_suggestions(session_id)
+        return APIResponse(data=result)
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=str(e))
 
 @router.post("/{session_id}/finalize", response_model=APIResponse[dict])
 async def finalize_session(
     session_id: uuid.UUID,
+    user_edits: dict = None,
     current_user: User = Depends(get_current_active_user),
     service: SessionService = Depends(get_session_service)
 ):
     """Finalize the session and trigger report generation."""
     try:
-        result = await service.finalize_session(session_id)
+        result = await service.finalize_session(session_id, user_edits)
         return APIResponse(data=result, message="Session finalized and knowledge record created.")
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e))
+    except Exception as e:
+        print(f"Finalize Error: {str(e)}")
+        raise HTTPException(status_code=500, detail="Internal Server Error")

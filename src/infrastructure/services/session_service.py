@@ -235,7 +235,19 @@ class SessionService:
             "previous_response": (db_session.step_responses or {}).get(str(prev_step_index))
         }
 
-    async def finalize_session(self, session_id: uuid.UUID) -> Dict[str, Any]:
+    async def get_completion_suggestions(self, session_id: uuid.UUID) -> Dict[str, Any]:
+        """Generate AI suggestions for department and summary before finalization."""
+        db_session = await self.repository.get_session(session_id)
+        if not db_session:
+            raise ValueError("Session not found")
+            
+        suggestions = await self.llm.suggest_completion_details(
+            db_session.problem_description,
+            db_session.step_responses
+        )
+        return suggestions
+
+    async def finalize_session(self, session_id: uuid.UUID, user_edits: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
         """Requirement 3: Finalize session, generate lessons learned, and store record."""
         db_session = await self.repository.get_session(session_id)
         if not db_session or db_session.status != "completed":
@@ -261,15 +273,37 @@ class SessionService:
             methodology=db_session.methodology
         )
         
-        # Save to DB
-        record = await self.repository.create_problem_record(
-            title=f"Problem: {db_session.problem_description[:30]}...",
+        # Fetch suggestions for metadata if not provided in user_edits
+        completion_details = {}
+        if not user_edits:
+            completion_details = await self.llm.suggest_completion_details(
+                db_session.problem_description,
+                db_session.step_responses
+            )
+        
+        department = user_edits.get("department") if user_edits else completion_details.get("department", "Üretim")
+        summary = user_edits.get("summary") if user_edits else completion_details.get("summary", db_session.problem_description[:100])
+        tags = user_edits.get("tags") if user_edits else completion_details.get("tags", [])
+        
+        # Ensure tags is a list
+        if isinstance(tags, str):
+            tags = [t.strip() for t in tags.split(",") if t.strip()]
+
+        # Persist Record
+        record = await self.repository.create_record(
+            session_id=session_id,
+            user_id=db_session.user_id,
+            title=summary,
             problem_description=db_session.problem_description,
             methodology=db_session.methodology,
-            step_responses=step_responses,
+            step_responses=db_session.step_responses,
             root_cause=root_cause,
-            corrective_actions=["Pending"],
-            lessons_learned=lessons_learned
+            corrective_actions=db_session.step_responses.get("corrective_actions", []),
+            lessons_learned=lessons_learned,
+            department=department,
+            tags=tags,
+            resolution_status="finalized",
+            resolution_date=datetime.utcnow()
         )
         
         # Embed and store in Qdrant if available
@@ -277,21 +311,25 @@ class SessionService:
             try:
                 # Prepare content for embedding
                 content = f"{record.title} {record.problem_description} {record.root_cause} {record.lessons_learned}"
-                metadata = {
+                # Prepare metadata for RAG
+                rag_metadata = {
                     "title": record.title,
+                    "department": record.department,
                     "methodology": record.methodology,
                     "root_cause": record.root_cause,
+                    "tags": record.tags,
                     "resolution_status": "finalized"
                 }
-                await self.rag.upsert_record(record.id, content, metadata)
-                await self.repository.update_problem_record_status(record.id, "embedded")
+                await self.rag.upsert_record(record.id, content, rag_metadata)
+                await self.repository.update_record(record.id, embedding_status="embedded")
             except Exception as e:
                 print(f"Failed to embed record {record.id}: {str(e)}")
-                await self.repository.update_problem_record_status(record.id, "embedding_failed")
+                await self.repository.update_record(record.id, embedding_status="embedding_failed")
                 
         return {
             "record_id": str(record.id),
             "title": record.title,
+            "department": record.department,
             "lessons_learned": lessons_learned,
             "status": "finalized"
         }

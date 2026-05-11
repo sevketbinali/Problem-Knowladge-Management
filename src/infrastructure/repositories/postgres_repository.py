@@ -84,17 +84,41 @@ class PostgreSQLRepository:
         result = await self.session.execute(select(ProblemRecord).offset(skip).limit(limit))
         return result.scalars().all()
 
-    async def search_records(self, query: str, limit: int = 10) -> Sequence[ProblemRecord]:
-        """Requirement 8.1, 8.2: Search records by title or description."""
-        stmt = (
-            select(ProblemRecord)
-            .where(
+    async def search_records(
+        self, 
+        query: str = None, 
+        department: str = None, 
+        methodology: str = None, 
+        tag: str = None,
+        sort: str = "newest",
+        skip: int = 0, 
+        limit: int = 50
+    ) -> Sequence[ProblemRecord]:
+        """Requirement 8.1, 8.2: Search and filter problem records."""
+        stmt = select(ProblemRecord)
+        
+        if query:
+            stmt = stmt.where(
                 (ProblemRecord.title.ilike(f"%{query}%")) |
-                (ProblemRecord.problem_description.ilike(f"%{query}%"))
+                (ProblemRecord.problem_description.ilike(f"%{query}%")) |
+                (ProblemRecord.root_cause.ilike(f"%{query}%"))
             )
-            .order_by(ProblemRecord.created_at.desc())
-            .limit(limit)
-        )
+            
+        if department:
+            stmt = stmt.where(ProblemRecord.department == department)
+            
+        if methodology:
+            stmt = stmt.where(ProblemRecord.methodology == methodology)
+            
+        if tag:
+            stmt = stmt.where(ProblemRecord.tags.contains([tag]))
+            
+        if sort == "newest":
+            stmt = stmt.order_by(ProblemRecord.created_at.desc())
+        else:
+            stmt = stmt.order_by(ProblemRecord.created_at.asc())
+            
+        stmt = stmt.offset(skip).limit(limit)
         result = await self.session.execute(stmt)
         return result.scalars().all()
 
