@@ -33,7 +33,7 @@ graph TB
             ChatSvc["Chatbot Servisi\n(Oturum Yönetimi)"]
             RAGSvc["RAG Motoru\n(Anlamsal Arama)"]
             EmbedSvc["Embedding Servisi\n(Vektör Üretimi)"]
-            LLMSvc["LLM İstemcisi\n(OpenAI API)"]
+            LLMSvc["LLM İstemcisi\n(Gemini API)"]
         end
         
         subgraph Data_Layer["Veri Katmanı"]
@@ -47,7 +47,7 @@ graph TB
         end
     end
     
-    OpenAI["OpenAI API\n(Harici)"]
+    Gemini["Gemini API\n(Harici)"]
     
     Client --> API
     API --> ChatSvc
@@ -55,8 +55,8 @@ graph TB
     ChatSvc --> LLMSvc
     RAGSvc --> EmbedSvc
     RAGSvc --> Qdrant
-    EmbedSvc --> OpenAI
-    LLMSvc --> OpenAI
+    EmbedSvc --> Gemini
+    LLMSvc --> Gemini
     ChatSvc --> PG
     RAGSvc --> Redis
     API --> Redis
@@ -225,7 +225,7 @@ class KnowledgeService:
 #### `QdrantRepository`
 - Qdrant Python istemcisi (async)
 - Koleksiyon: `problem_records`
-- Vektör boyutu: 1536 (OpenAI `text-embedding-3-small`)
+- Vektör boyutu: 768 (Gemini `text-embedding-004`)
 - Mesafe metriği: Cosine similarity
 - HNSW indeks parametreleri: `m=16`, `ef_construct=100`
 

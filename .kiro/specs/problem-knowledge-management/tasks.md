@@ -1,4 +1,4 @@
-﻿# Uygulama Planı: Problem Bilgi Yönetim Sistemi
+# Uygulama Planı: Problem Bilgi Yönetim Sistemi
 
 ## Genel Bakış
 
@@ -12,8 +12,8 @@ Bu plan, FastAPI + PostgreSQL + Qdrant + Redis + Celery mimarisi üzerine inşa 
 
 - [x] 1. Proje iskeletini ve temel yapılandırmayı oluştur
   - `src/`, `tests/unit/`, `tests/integration/`, `tests/smoke/` dizin yapısını oluştur
-  - `pyproject.toml` veya `requirements.txt` içine bağımlılıkları ekle: fastapi, uvicorn, sqlalchemy[asyncio], asyncpg, pydantic, redis, celery, qdrant-client, openai, bcrypt, hypothesis, pytest, pytest-asyncio
-  - `.env.example` dosyasını oluştur: `DATABASE_URL`, `QDRANT_URL`, `REDIS_URL`, `OPENAI_API_KEY`, `JWT_SECRET` yer tutucu değerleriyle
+  - `pyproject.toml` veya `requirements.txt` içine bağımlılıkları ekle: fastapi, uvicorn, sqlalchemy[asyncio], asyncpg, pydantic, redis, celery, qdrant-client, google-generativeai, bcrypt, hypothesis, pytest, pytest-asyncio
+  - `.env.example` dosyasını oluştur: `DATABASE_URL`, `QDRANT_URL`, `REDIS_URL`, `GEMINI_API_KEY`, `JWT_SECRET` yer tutucu değerleriyle
   - `docker-compose.yml` dosyasını yaz: fastapi, postgresql, qdrant, redis servisleri + adlandırılmış kalıcı volume'lar
   - `Dockerfile` yaz: sıkıştırılmış imaj boyutu ≤ 1 GB
   - Doğrulama: `docker-compose up --build` → `/ready` endpoint 120 saniye içinde HTTP 200 döndürür; `docker-compose down -v && docker-compose up` → veri kaybı yok
@@ -315,13 +315,13 @@ Bu plan, FastAPI + PostgreSQL + Qdrant + Redis + Celery mimarisi üzerine inşa 
 
 - [ ] 15. Embedding ve Qdrant altyapısını uygula
   - [~] 15.1 `EmbeddingService` sınıfını yaz
-    - `generate_embedding` ve `generate_batch_embeddings` metodlarını uygula (OpenAI `text-embedding-3-small`, 1536 boyut)
-    - Doğrulama: Geçerli metin → 1536 boyutlu float listesi döner; OpenAI API mock ile test et
+    - `generate_embedding` ve `generate_batch_embeddings` metodlarını uygula (Gemini `text-embedding-004`, 768 boyut)
+    - Doğrulama: Geçerli metin → 768 boyutlu float listesi döner; Gemini API mock ile test et
     - _Gereksinimler: 6.2_
 
   - [~] 15.2 `QdrantRepository` sınıfını yaz
     - `index_record`, `search_similar`, `update_record`, `delete_record` metodlarını uygula
-    - Koleksiyon: `problem_records`; vektör boyutu: 1536; mesafe: Cosine; HNSW: m=16, ef_construct=100
+    - Koleksiyon: `problem_records`; vektör boyutu: 768; mesafe: Cosine; HNSW: m=16, ef_construct=100
     - Doğrulama: Kayıt ekle → arama ile geri bul; silinen kayıt → arama sonuçlarında görünmemeli
     - _Gereksinimler: 6.2, 8.1_
 

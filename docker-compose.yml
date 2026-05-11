@@ -16,6 +16,8 @@ services:
       DATABASE_URL: postgresql+asyncpg://${POSTGRES_USER:-pkms}:${POSTGRES_PASSWORD:-pkms_secret}@postgres:5432/${POSTGRES_DB:-pkms}
       QDRANT_URL: http://qdrant:6333
       REDIS_URL: redis://redis:6379/0
+    volumes:
+      - .:/app
     depends_on:
       postgres:
         condition: service_healthy
