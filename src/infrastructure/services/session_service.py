@@ -275,7 +275,15 @@ class SessionService:
         # Embed and store in Qdrant if available
         if self.rag:
             try:
-                await self.rag.embed_and_store(record)
+                # Prepare content for embedding
+                content = f"{record.title} {record.problem_description} {record.root_cause} {record.lessons_learned}"
+                metadata = {
+                    "title": record.title,
+                    "methodology": record.methodology,
+                    "root_cause": record.root_cause,
+                    "resolution_status": "finalized"
+                }
+                await self.rag.upsert_record(record.id, content, metadata)
                 await self.repository.update_problem_record_status(record.id, "embedded")
             except Exception as e:
                 print(f"Failed to embed record {record.id}: {str(e)}")
