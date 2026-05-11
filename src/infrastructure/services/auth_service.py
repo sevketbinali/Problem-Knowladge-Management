@@ -24,7 +24,9 @@ class AuthService:
             "id": str(user.id),
             "email": user.email,
             "full_name": user.full_name,
-            "role": user.role
+            "role": user.role,
+            "is_active": user.is_active,
+            "created_at": user.created_at
         }
 
     async def login_for_access_token(self, email: str, password: str) -> Optional[dict]:
@@ -58,5 +60,7 @@ class AuthService:
             "id": str(user.id),
             "email": user.email,
             "full_name": user.full_name,
-            "role": user.role
+            "role": user.role,
+            "is_active": user.is_active,
+            "created_at": user.created_at
         }

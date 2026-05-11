@@ -17,14 +17,14 @@ class APIResponse(BaseModel, Generic[T]):
 
 # Auth Schemas
 class UserBase(BaseModel):
-    email: EmailStr
+    email: str
     full_name: str
 
 class UserCreate(UserBase):
     password: str
 
 class UserLogin(BaseModel):
-    email: EmailStr
+    email: str
     password: str
 
 class UserResponse(UserBase):
@@ -49,8 +49,8 @@ class SessionStart(BaseModel):
 
 class SessionResponse(BaseModel):
     session_id: str
-    methodology: str
-    current_step: int
+    methodology: Optional[str] = None
+    current_step: Optional[int] = None
     next_prompt: Optional[str] = None
     total_steps: Optional[int] = None
     status: str = "active"
