@@ -224,14 +224,13 @@ Bu plan, FastAPI + PostgreSQL + Qdrant + Redis + Celery mimarisi üzerine inşa 
     - Doğrulama: `pytest tests/unit/test_8d.py::test_8d_completion_requirement` geçmeli
     - **Doğrular: Gereksinim 2.6, 5.5**
 
-- [ ] 10. Ishikawa analizi özelliklerini uygula
-  - [~] 10.1 Ishikawa oturum akışını uygula
+  - [x] 10.1 Ishikawa oturum akışını uygula
     - 6 kategoriyi sırasıyla sun: Man, Machine, Method, Material, Measurement, Environment
     - Her kategori için 1–500 karakter doğrulaması; boş yanıt → aynı kategori yeniden sunulur
     - Doğrulama: Kategori sırası doğru; boş yanıt → hata ve aynı soru; 501 karakter → hata
     - _Gereksinimler: 3.1, 3.2_
 
-  - [~] 10.2 Ishikawa veri nesnesini oturum kaydına kaydet
+  - [x] 10.2 Ishikawa veri nesnesini oturum kaydına kaydet
     - 6 kategori tamamlandığında `IshikawaData` nesnesini `step_responses` alanına yaz
     - Doğrulama: Kaydedilen nesne geri okunduğunda 6 kategori ve ilişkili nedenler listesi orijinal verilerle eşleşmeli
     - _Gereksinimler: 3.4_
@@ -242,36 +241,36 @@ Bu plan, FastAPI + PostgreSQL + Qdrant + Redis + Celery mimarisi üzerine inşa 
     - Doğrulama: `pytest tests/unit/test_ishikawa.py::test_ishikawa_storage_roundtrip` geçmeli
     - **Doğrular: Gereksinim 3.4**
 
-  - [~] 10.4 Ishikawa kategori yeniden atama önerisini uygula
+  - [x] 10.4 Ishikawa kategori yeniden atama önerisini uygula
     - LLM bir nedenin farklı kategoriye uygun olduğunu tespit ettiğinde tam olarak bir alternatif kategori önerisi sun; kullanıcı orijinali onaylayabilir veya öneriyi kabul edebilir
     - Doğrulama: LLM yanıtı mock ile test et; öneri mesajı tam olarak bir alternatif kategori içermeli
     - _Gereksinimler: 3.6_
 
-- [ ] 11. 5 Why analizi özelliklerini uygula
-  - [~] 11.1 5 Why oturum akışını uygula
+- [x] 11. 5 Why analizi özelliklerini uygula
+  - [x] 11.1 5 Why oturum akışını uygula
     - İlk soru: "Bu problem neden oluşuyor?"; her yanıt sonrası LLM ile bağlamsal sonraki soru üret (3 saniye timeout)
     - Minimum 3, maksimum 7 soru; 3. yanıt sonrası manuel ilerleme seçeneği; 7. yanıt sonrası otomatik kök neden onayına geç
     - Doğrulama: 2 yanıt sonrası ilerleme → engellenmeli; 3 yanıt sonrası → izin verilmeli; 7. yanıt → otomatik geçiş
     - _Gereksinimler: 4.1, 4.2, 4.3_
 
-  - [ ]* 11.2 Özellik 10 için property testi yaz — 5 Why soru sayısı sınırları
+  - [x] 11.2 Özellik 10 için property testi yaz — 5 Why soru sayısı sınırları
     - **Özellik 10: 5 Why Soru Sayısı Sınırları**
     - `st.integers(min_value=1, max_value=10)` stratejisiyle: soru sayısı 3–7 arasında; <3 → ilerleme engellenir; 7. yanıt → otomatik geçiş
     - Doğrulama: `pytest tests/unit/test_5why.py::test_5why_question_count_limits` geçmeli
     - **Doğrular: Gereksinim 4.3**
 
-  - [~] 11.3 Döngüsel mantık tespitini uygula
+  - [x] 11.3 Döngüsel mantık tespitini uygula
     - `detect_circular_logic(current_answer: str, previous_answers: list[str]) -> bool` fonksiyonu: mevcut yanıt ile önceki yanıtlardan herhangi biri arasında %70+ kelime örtüşmesi → `True`
     - Doğrulama: Aynı cümle → `True`; tamamen farklı cümle → `False`; %69 örtüşme → `False`; %70 örtüşme → `True`
     - _Gereksinimler: 4.5_
 
-  - [ ]* 11.4 Özellik 11 için property testi yaz — 5 Why döngüsel mantık tespiti
+  - [x] 11.4 Özellik 11 için property testi yaz — 5 Why döngüsel mantık tespiti
     - **Özellik 11: 5 Why Döngüsel Mantık Tespiti**
     - `st.lists(st.text(), min_size=2)` stratejisiyle: %70+ kelime örtüşmesi → uyarı ve yanıt reddedilir
     - Doğrulama: `pytest tests/unit/test_5why.py::test_circular_logic_detection` geçmeli
     - **Doğrular: Gereksinim 4.5**
 
-  - [~] 11.5 5 Why zincirini oturum kaydına kaydet
+  - [x] 11.5 5 Why zincirini oturum kaydına kaydet
     - Kök neden onaylandığında `WhyChain` nesnesini (sorular, yanıtlar, onaylanan kök neden) `step_responses` alanına yaz
     - Doğrulama: Kaydedilen zincir geri okunduğunda sorular, yanıtlar ve kök neden orijinal verilerle eşleşmeli
     - _Gereksinimler: 4.6_
@@ -282,8 +281,8 @@ Bu plan, FastAPI + PostgreSQL + Qdrant + Redis + Celery mimarisi üzerine inşa 
     - Doğrulama: `pytest tests/unit/test_5why.py::test_5why_chain_roundtrip` geçmeli
     - **Doğrular: Gereksinim 4.6**
 
-- [ ] 12. 8D raporu özelliklerini uygula
-  - [~] 12.1 8D raporu JSON üretimini uygula
+- [x] 12. 8D raporu özelliklerini uygula
+  - [x] 12.1 8D raporu JSON üretimini uygula
     - Oturum tamamlandığında 8 disiplini ve yanıtlarını içeren `EightDReport` nesnesini JSON formatında üret ve `Problem_Record`'a ekle
     - Rapor üretimi başarısız olursa kısmi rapor eklenmez; kullanıcıya hata döndürülür
     - Doğrulama: Tüm 8 disiplin dolu → JSON raporu üretilir ve şemaya uygun; üretim hatası → `Problem_Record`'da rapor alanı boş
@@ -295,19 +294,19 @@ Bu plan, FastAPI + PostgreSQL + Qdrant + Redis + Celery mimarisi üzerine inşa 
     - Doğrulama: `pytest tests/unit/test_8d.py::test_8d_report_schema_compliance` geçmeli
     - **Doğrular: Gereksinim 5.4**
 
-- [~] 13. Kontrol noktası — Metodoloji katmanı
+- [x] 13. Kontrol noktası — Metodoloji katmanı
   - `pytest tests/unit/test_session.py tests/unit/test_8d.py tests/unit/test_5why.py tests/unit/test_ishikawa.py -v` geçmeli
   - Soru varsa kullanıcıya sor.
 
 
-- [ ] 14. LLM servisini uygula
-  - [~] 14.1 `LLMService` sınıfını yaz
+- [x] 14. LLM servisini uygula
+  - [x] 14.1 `LLMService` sınıfını yaz
     - `generate_clarification`, `generate_next_why`, `generate_lessons_learned`, `generate_ishikawa_summary`, `suggest_category_reassignment` metodlarını uygula
     - Her metod için timeout ve fallback stratejisi: takip sorusu → statik fallback; Lessons Learned → 15 saniye timeout sonrası şablon; 5 Why sorusu → 3 saniye timeout sonrası hata + yeniden deneme
     - Doğrulama: LLM mock ile test et; timeout senaryosunda fallback devreye girmeli; fallback ilerlemeyi engellememeli
     - _Gereksinimler: 2.8, 4.2, 7.5_
 
-  - [~] 14.2 Lessons Learned yapısal bileşen kontrolünü uygula
+  - [x] 14.2 Lessons Learned yapısal bileşen kontrolünü uygula
     - LLM çıktısında kök neden, düzeltici eylemler, sonuç ve en az bir önleyici öneri yoksa eksik bileşenler için yapılandırılmış placeholder ekle
     - Doğrulama: 4 bileşen tam → placeholder eklenmez; 1 bileşen eksik → o bileşen için placeholder eklenir
     - _Gereksinimler: 7.4_

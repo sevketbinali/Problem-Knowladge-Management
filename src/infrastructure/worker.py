@@ -59,9 +59,15 @@ def process_problem_embedding(self, record_id_str: str, text_content: str, metad
             raise self.retry(exc=e)
 
     try:
-        loop.run_until_complete(_run())
+        if loop.is_running():
+            # If we are in an environment with a running loop (like pytest-asyncio),
+            # we should technically use a separate thread or just run the coroutine.
+            # But Celery tasks are sync. In tests, we can use this trick:
+            import nest_asyncio
+            nest_asyncio.apply()
+            loop.run_until_complete(_run())
+        else:
+            loop.run_until_complete(_run())
     except Exception as e:
-        # Final failure after retries will be caught by Celery
         print(f"Final failure for record {record_id}: {str(e)}")
-        # In actual production, we might want to log this to a monitoring system
         raise e

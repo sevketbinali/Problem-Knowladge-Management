@@ -70,3 +70,15 @@ class LLMService:
         if "UYGUN" in result or result not in ["MAN", "MACHINE", "METHOD", "MATERIAL", "MEASUREMENT", "ENVIRONMENT"]:
             return None
         return result.capitalize()
+    async def is_response_vague(self, response: str) -> bool:
+        """Requirement 2.3: Use LLM to determine if the response is vague."""
+        if len(response) < 10:
+            return True
+        
+        prompt = (
+            f"Aşağıdaki kullanıcı yanıtının bir problem çözüm adımı için yeterince açıklayıcı olup olmadığını değerlendir.\n"
+            f"Yanıt: '{response}'\n\n"
+            f"Eğer yanıt çok kısa, anlamsız veya yetersiz ise 'BELİRSİZ' de. Eğer yeterli ise 'YETERLİ' de."
+        )
+        result = await self._generate(prompt, timeout=5)
+        return "BELİRSİZ" in result.upper()

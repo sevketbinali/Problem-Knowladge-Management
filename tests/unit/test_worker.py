@@ -3,40 +3,39 @@ import uuid
 from unittest.mock import AsyncMock, MagicMock, patch
 from src.infrastructure.worker import process_problem_embedding
 
-@pytest.mark.asyncio
-async def test_embedding_task_retry():
+def test_embedding_task_retry():
     """Requirement 6.4: Embedding task should retry on failure."""
     
     record_id = uuid.uuid4()
     text = "test problem"
     metadata = {"key": "value"}
     
-    # Mock self (the task instance)
-    mock_task = MagicMock()
-    mock_task.retry = MagicMock(side_effect=Exception("Retrying..."))
-    
-    # Mock dependencies inside the task
-    with patch("src.infrastructure.worker.EmbeddingService") as mock_emb_service_class, \
-         patch("src.infrastructure.worker.RAGEngine") as mock_rag_engine_class, \
-         patch("src.infrastructure.worker.AsyncSessionLocal") as mock_session_class:
+    # Patch the task's retry method
+    with patch("src.infrastructure.worker.process_problem_embedding.retry") as mock_retry:
+        mock_retry.side_effect = Exception("Retrying...")
         
-        # Setup mocks
-        mock_emb_service = mock_emb_service_class.return_value
-        mock_rag_engine = mock_rag_engine_class.return_value
-        
-        # Simulate failure in upsert
-        mock_rag_engine.upsert_record = AsyncMock(side_effect=Exception("API Error"))
-        
-        # Mock DB session
-        mock_session_instance = AsyncMock()
-        mock_session_class.return_value.__aenter__.return_value = mock_session_instance
-        
-        # Run the task directly using __wrapped__ to bypass Celery's bound self injection
-        with pytest.raises(Exception, match="Retrying..."):
-            process_problem_embedding.__wrapped__(mock_task, str(record_id), text, metadata)
+        # Mock dependencies inside the task
+        with patch("src.infrastructure.worker.EmbeddingService") as mock_emb_service_class, \
+             patch("src.infrastructure.worker.RAGEngine") as mock_rag_engine_class, \
+             patch("src.infrastructure.worker.AsyncSessionLocal") as mock_session_class:
             
-        # Verify retry was called
-        mock_task.retry.assert_called_once()
+            # Setup mocks
+            mock_emb_service = mock_emb_service_class.return_value
+            mock_rag_engine = mock_rag_engine_class.return_value
+            
+            # Simulate failure in upsert
+            mock_rag_engine.upsert_record = AsyncMock(side_effect=Exception("API Error"))
+            
+            # Mock DB session
+            mock_session_instance = AsyncMock()
+            mock_session_class.return_value.__aenter__.return_value = mock_session_instance
+            
+            # Run the task directly
+            with pytest.raises(Exception, match="Retrying..."):
+                process_problem_embedding.run(str(record_id), text, metadata)
+                
+            # Verify retry was called
+            mock_retry.assert_called_once()
         
         # Verify status was updated to failed (temporarily)
         # We need to check if repo.update_record was called with embedding_status="failed"
@@ -66,7 +65,7 @@ def test_embedding_task_success():
             mock_repo = mock_repo_class.return_value
             mock_repo.update_record = AsyncMock()
             
-            process_problem_embedding.__wrapped__(mock_task, str(record_id), text, metadata)
+            process_problem_embedding.run(str(record_id), text, metadata)
             
             # Verify upsert and status update
             mock_rag_engine.upsert_record.assert_called_once()
