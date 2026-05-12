@@ -46,7 +46,8 @@ async def search_records(
             user_id=current_user.id,
             query=query,
             filters=filters,
-            limit=10
+            limit=10,
+            score_threshold=0.65
         )
         return APIResponse(data=result)
     except Exception as e:

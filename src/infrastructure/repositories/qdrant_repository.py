@@ -49,7 +49,7 @@ class QdrantRepository:
             ]
         )
 
-    async def search_similar(self, vector: List[float], limit: int = 10, score_threshold: float = 0.55, filters: Optional[Dict[str, Any]] = None) -> List[Dict[str, Any]]:
+    async def search_similar(self, vector: List[float], limit: int = 10, score_threshold: float = 0.60, filters: Optional[Dict[str, Any]] = None) -> List[Dict[str, Any]]:
         """Search for similar records in Qdrant."""
         # Convert filters to Qdrant format if provided
         query_filter = None

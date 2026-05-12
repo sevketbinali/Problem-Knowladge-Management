@@ -26,6 +26,7 @@ import {
   type ProblemRecord,
   type SimilarProblem 
 } from "@/lib/api";
+import UnifiedRecordDetail from "./unified-record-detail";
 
 interface ChatMessage {
   role: "user" | "assistant";
@@ -257,87 +258,67 @@ export default function ChatSession({
         >
           <div 
             style={{
-              width: "100%", maxWidth: 800, maxHeight: "90vh",
-              background: "var(--color-surface)", borderRadius: 20,
+              width: "95%", 
+              maxWidth: 1000, 
+              maxHeight: "80vh",
+              background: "var(--color-surface)", 
+              borderRadius: 20,
               border: "1px solid var(--color-border)",
-              boxShadow: "0 20px 50px rgba(0,0,0,0.2)",
-              display: "flex", flexDirection: "column", overflow: "hidden"
+              boxShadow: "0 30px 90px rgba(0,0,0,0.4)",
+              display: "flex", 
+              flexDirection: "column", 
+              overflow: "hidden",
+              position: "relative"
             }}
             onClick={e => e.stopPropagation()}
           >
-            <div style={{ padding: "20px 24px", borderBottom: "1px solid var(--color-border)", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-              <div>
-                <h3 style={{ fontSize: 18, fontWeight: 700, color: "var(--color-text-primary)" }}>Kayıt Detayı</h3>
-                <p style={{ fontSize: 12, color: "var(--color-text-muted)" }}>ID: {detailRecord.id}</p>
+            <div style={{ 
+              padding: "24px 32px", 
+              borderBottom: "1px solid var(--color-border)", 
+              display: "flex", 
+              justifyContent: "space-between", 
+              alignItems: "center", 
+              background: "var(--color-surface)",
+              position: "sticky",
+              top: 0,
+              zIndex: 10
+            }}>
+              <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+                <div style={{ width: 10, height: 10, borderRadius: "50%", background: "var(--color-accent)" }} />
+                <h3 style={{ fontSize: 20, fontWeight: 600, color: "var(--color-text-primary)" }}>Benzer Problem Detayı</h3>
               </div>
-              <button onClick={() => setIsDetailModalOpen(false)} style={{ background: "none", border: "none", color: "var(--color-text-muted)", cursor: "pointer" }}>
-                <X size={20} />
+              <button 
+                onClick={() => setIsDetailModalOpen(false)} 
+                style={{ 
+                  background: "var(--color-surface-hover)", 
+                  border: "1px solid var(--color-border)",
+                  borderRadius: "12px",
+                  padding: "8px 12px",
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 8,
+                  color: "var(--color-text-muted)", 
+                  cursor: "pointer",
+                  transition: "all 0.15s",
+                  fontSize: 13,
+                  fontWeight: 500
+                }}
+                onMouseEnter={(e) => {
+                  (e.currentTarget as HTMLElement).style.background = "var(--color-danger-bg)";
+                  (e.currentTarget as HTMLElement).style.color = "var(--color-danger)";
+                }}
+                onMouseLeave={(e) => {
+                  (e.currentTarget as HTMLElement).style.background = "var(--color-surface-hover)";
+                  (e.currentTarget as HTMLElement).style.color = "var(--color-text-muted)";
+                }}
+              >
+                <X size={18} />
+                <span>Kapat</span>
               </button>
             </div>
             
-            <div style={{ flex: 1, overflowY: "auto", padding: 24, display: "flex", flexDirection: "column", gap: 20 }}>
-              <div>
-                <h4 style={{ fontSize: 13, fontWeight: 700, textTransform: "uppercase", color: "var(--color-accent)", marginBottom: 8 }}>Başlık</h4>
-                <p style={{ fontSize: 16, fontWeight: 600, color: "var(--color-text-primary)" }}>{detailRecord.title}</p>
-              </div>
-
-              <div style={{ display: "flex", gap: 30 }}>
-                <div>
-                  <h4 style={{ fontSize: 11, fontWeight: 700, textTransform: "uppercase", color: "var(--color-text-muted)", marginBottom: 4 }}>Metodoloji</h4>
-                  <span style={{ fontSize: 12, fontWeight: 600, color: "var(--color-accent)", background: "var(--color-accent-subtle)", padding: "4px 10px", borderRadius: 6 }}>{detailRecord.methodology}</span>
-                </div>
-                <div>
-                  <h4 style={{ fontSize: 11, fontWeight: 700, textTransform: "uppercase", color: "var(--color-text-muted)", marginBottom: 4 }}>Departman</h4>
-                  <span style={{ fontSize: 12, fontWeight: 600, color: "var(--color-text-primary)", background: "var(--color-surface-hover)", border: "1px solid var(--color-border)", padding: "4px 10px", borderRadius: 6 }}>{detailRecord.department || "Bilinmiyor"}</span>
-                </div>
-              </div>
-
-              <div>
-                <h4 style={{ fontSize: 13, fontWeight: 700, textTransform: "uppercase", color: "var(--color-text-muted)", marginBottom: 8 }}>Problem Açıklaması</h4>
-                <p style={{ fontSize: 14, color: "var(--color-text-secondary)", lineHeight: 1.6, background: "var(--color-surface-hover)", padding: 16, borderRadius: 12 }}>{detailRecord.problem_description}</p>
-              </div>
-
-              <div>
-                <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 8 }}>
-                  <Target size={14} style={{ color: "var(--color-text-muted)" }} />
-                  <h4 style={{ fontSize: 13, fontWeight: 700, textTransform: "uppercase", color: "var(--color-text-muted)" }}>Kök Neden</h4>
-                </div>
-                <div className="markdown-content" style={{ fontSize: 14, color: "var(--color-text-primary)", lineHeight: 1.6, borderLeft: "3px solid var(--color-accent)", paddingLeft: 16 }}>
-                  <ReactMarkdown remarkPlugins={[remarkGfm]}>{detailRecord.root_cause}</ReactMarkdown>
-                </div>
-              </div>
-
-              <div>
-                <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 8 }}>
-                  <Lightbulb size={14} style={{ color: "var(--color-text-muted)" }} />
-                  <h4 style={{ fontSize: 13, fontWeight: 700, textTransform: "uppercase", color: "var(--color-text-muted)" }}>Alınan Dersler</h4>
-                </div>
-                <div 
-                  className="markdown-content"
-                  style={{ 
-                    fontSize: 14, 
-                    color: "var(--color-text-secondary)", 
-                    lineHeight: 1.6, 
-                    padding: "16px",
-                    background: "var(--color-surface-hover)",
-                    borderRadius: "12px",
-                    border: "1px solid var(--color-border)"
-                  }}
-                >
-                  <ReactMarkdown remarkPlugins={[remarkGfm]}>{detailRecord.lessons_learned}</ReactMarkdown>
-                </div>
-              </div>
-
-              {detailRecord.tags && detailRecord.tags.length > 0 && (
-                <div>
-                  <h4 style={{ fontSize: 13, fontWeight: 700, textTransform: "uppercase", color: "var(--color-text-muted)", marginBottom: 8 }}>Etiketler</h4>
-                  <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
-                    {detailRecord.tags.map(t => (
-                      <span key={t} style={{ fontSize: 12, color: "var(--color-text-secondary)", background: "var(--color-surface-hover)", border: "1px solid var(--color-border)", padding: "4px 12px", borderRadius: 999 }}>#{t}</span>
-                    ))}
-                  </div>
-                </div>
-              )}
+            <div style={{ flex: 1, overflowY: "auto", padding: "40px 48px" }}>
+              <UnifiedRecordDetail record={detailRecord} />
             </div>
           </div>
         </div>

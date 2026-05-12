@@ -36,13 +36,16 @@ async def list_records(
         {
             "id": str(r.id),
             "title": r.title,
+            "problem_description": r.problem_description,
             "department": r.department,
             "methodology": r.methodology,
             "root_cause": r.root_cause,
             "lessons_learned": r.lessons_learned,
             "tags": r.tags or [],
-            "status": r.resolution_status,
-            "created_at": r.created_at.isoformat()
+            "resolution_status": r.resolution_status,
+            "created_by": r.user.full_name if r.user else "Bilinmiyor",
+            "created_at": r.created_at.isoformat(),
+            "updated_at": r.updated_at.isoformat() if r.updated_at else r.created_at.isoformat()
         }
         for r in records
     ]
@@ -71,6 +74,7 @@ async def get_record(
         "lessons_learned": record.lessons_learned,
         "tags": record.tags or [],
         "status": record.resolution_status,
+        "created_by": record.user.full_name if record.user else "Bilinmiyor",
         "created_at": record.created_at.isoformat()
     }
     return APIResponse(data=data)

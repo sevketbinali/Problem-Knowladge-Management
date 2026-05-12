@@ -41,7 +41,7 @@ class RAGEngine:
             self._record_error()
             raise
 
-    async def search_similar(self, query: str, limit: int = 5, filters: Optional[Dict[str, Any]] = None) -> List[Dict[str, Any]]:
+    async def search_similar(self, query: str, limit: int = 5, score_threshold: Optional[float] = None, filters: Optional[Dict[str, Any]] = None) -> List[Dict[str, Any]]:
         """Requirement 8.1, 8.2: Search for similar problem records with degraded mode support."""
         if self._check_degraded():
             # Requirement 23.1: Return empty results or raise specific error in degraded mode
@@ -50,7 +50,11 @@ class RAGEngine:
 
         try:
             query_vector = await self.embedding_service.generate_embedding(query)
-            results = await self.repository.search_similar(query_vector, limit=limit, filters=filters)
+            search_params = {"limit": limit, "filters": filters}
+            if score_threshold is not None:
+                search_params["score_threshold"] = score_threshold
+                
+            results = await self.repository.search_similar(query_vector, **search_params)
             self._error_count = 0
             return results
         except Exception:

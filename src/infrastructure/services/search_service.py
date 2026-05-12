@@ -23,7 +23,8 @@ class SearchService:
         user_id: uuid.UUID,
         query: str, 
         filters: Optional[Dict[str, Any]] = None,
-        limit: int = 10
+        limit: int = 10,
+        score_threshold: Optional[float] = None
     ) -> List[Dict[str, Any]]:
         """
         Search for records using semantic similarity and optional filters.
@@ -57,7 +58,8 @@ class SearchService:
         results = await self.rag.search_similar(
             query=query,
             limit=limit,
-            filters=filters
+            filters=filters,
+            score_threshold=score_threshold
         )
         
         # Save to cache

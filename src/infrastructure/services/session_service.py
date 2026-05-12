@@ -64,7 +64,7 @@ class SessionService:
         message = None
         if self.rag:
             try:
-                similar_records = await self.rag.search_similar(problem_description, limit=5)
+                similar_records = await self.rag.search_similar(problem_description, limit=5, score_threshold=0.65)
             except Exception as e:
                 # Requirement 23.2: Degraded mode warning
                 message = "Bilgi tabanına şu an erişilemiyor, oturum benzer kayıtlar olmadan devam edecek."
@@ -319,6 +319,7 @@ class SessionService:
                     "methodology": record.methodology,
                     "root_cause": record.root_cause,
                     "tags": record.tags,
+                    "created_by": record.user.full_name if record.user else "Admin",
                     "resolution_status": "finalized"
                 }
                 await self.rag.upsert_record(record.id, content, rag_metadata)

@@ -52,6 +52,7 @@ export interface ProblemRecord {
   tags?: string[];
   corrective_actions?: string[];
   resolution_status: string;
+  created_by: string;
   created_at: string;
   updated_at: string;
 }

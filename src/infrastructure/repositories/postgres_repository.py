@@ -3,6 +3,7 @@ from typing import Any, Sequence
 
 from sqlalchemy import delete, select, update
 from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.orm import joinedload
 
 from src.infrastructure.models import AuditLog, ProblemRecord, Session, User
 
@@ -65,7 +66,11 @@ class PostgreSQLRepository:
         return record
 
     async def get_record(self, record_id: uuid.UUID) -> ProblemRecord | None:
-        result = await self.session.execute(select(ProblemRecord).where(ProblemRecord.id == record_id))
+        result = await self.session.execute(
+            select(ProblemRecord)
+            .options(joinedload(ProblemRecord.user))
+            .where(ProblemRecord.id == record_id)
+        )
         return result.scalar_one_or_none()
 
     async def update_record(self, record_id: uuid.UUID, **kwargs) -> ProblemRecord | None:
@@ -95,7 +100,7 @@ class PostgreSQLRepository:
         limit: int = 50
     ) -> Sequence[ProblemRecord]:
         """Requirement 8.1, 8.2: Search and filter problem records."""
-        stmt = select(ProblemRecord)
+        stmt = select(ProblemRecord).options(joinedload(ProblemRecord.user))
         
         if query:
             stmt = stmt.where(
