@@ -2,6 +2,8 @@
 
 import { useState, useRef, useEffect } from "react";
 import { useAuth } from "@/lib/auth-context";
+import ReactMarkdown from "react-markdown";
+import remarkGfm from "remark-gfm";
 import { 
   Send, 
   CheckCircle2, 
@@ -11,8 +13,8 @@ import {
   Sparkles, 
   X, 
   Tag, 
-  Info,
-  ExternalLink
+  Lightbulb,
+  Target
 } from "lucide-react";
 import { 
   submitStep,
@@ -20,6 +22,7 @@ import {
   stepBack,
   getSuggestions, 
   getRecord, 
+  searchKnowledge,
   type ProblemRecord,
   type SimilarProblem 
 } from "@/lib/api";
@@ -295,13 +298,34 @@ export default function ChatSession({
               </div>
 
               <div>
-                <h4 style={{ fontSize: 13, fontWeight: 700, textTransform: "uppercase", color: "var(--color-text-muted)", marginBottom: 8 }}>Kök Neden</h4>
-                <p style={{ fontSize: 14, color: "var(--color-text-primary)", lineHeight: 1.6, borderLeft: "3px solid var(--color-accent)", paddingLeft: 16 }}>{detailRecord.root_cause}</p>
+                <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 8 }}>
+                  <Target size={14} style={{ color: "var(--color-text-muted)" }} />
+                  <h4 style={{ fontSize: 13, fontWeight: 700, textTransform: "uppercase", color: "var(--color-text-muted)" }}>Kök Neden</h4>
+                </div>
+                <div className="markdown-content" style={{ fontSize: 14, color: "var(--color-text-primary)", lineHeight: 1.6, borderLeft: "3px solid var(--color-accent)", paddingLeft: 16 }}>
+                  <ReactMarkdown remarkPlugins={[remarkGfm]}>{detailRecord.root_cause}</ReactMarkdown>
+                </div>
               </div>
 
               <div>
-                <h4 style={{ fontSize: 13, fontWeight: 700, textTransform: "uppercase", color: "var(--color-text-muted)", marginBottom: 8 }}>Alınan Dersler</h4>
-                <div style={{ fontSize: 14, color: "var(--color-text-secondary)", lineHeight: 1.6, whiteSpace: "pre-wrap" }}>{detailRecord.lessons_learned}</div>
+                <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 8 }}>
+                  <Lightbulb size={14} style={{ color: "var(--color-text-muted)" }} />
+                  <h4 style={{ fontSize: 13, fontWeight: 700, textTransform: "uppercase", color: "var(--color-text-muted)" }}>Alınan Dersler</h4>
+                </div>
+                <div 
+                  className="markdown-content"
+                  style={{ 
+                    fontSize: 14, 
+                    color: "var(--color-text-secondary)", 
+                    lineHeight: 1.6, 
+                    padding: "16px",
+                    background: "var(--color-surface-hover)",
+                    borderRadius: "12px",
+                    border: "1px solid var(--color-border)"
+                  }}
+                >
+                  <ReactMarkdown remarkPlugins={[remarkGfm]}>{detailRecord.lessons_learned}</ReactMarkdown>
+                </div>
               </div>
 
               {detailRecord.tags && detailRecord.tags.length > 0 && (
@@ -986,6 +1010,29 @@ export default function ChatSession({
         }
         .animate-fade-in { animation: fade-in 0.3s ease-out forwards; }
         @keyframes fade-in { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        .markdown-content h1, .markdown-content h2, .markdown-content h3 {
+          margin-top: 16px;
+          margin-bottom: 8px;
+          font-weight: 600;
+          color: var(--color-text-primary);
+        }
+        .markdown-content h1 { font-size: 1.4rem; }
+        .markdown-content h2 { font-size: 1.2rem; }
+        .markdown-content h3 { font-size: 1.1rem; }
+        .markdown-content p { margin-bottom: 12px; }
+        .markdown-content ul, .markdown-content ol {
+          margin-bottom: 12px;
+          padding-left: 20px;
+        }
+        .markdown-content li { margin-bottom: 4px; }
+        .markdown-content strong { color: var(--color-text-primary); }
+        .markdown-content code {
+          background: rgba(0,0,0,0.05);
+          padding: 2px 4px;
+          border-radius: 4px;
+          font-family: var(--font-mono);
+          font-size: 0.9em;
+        }
       `}</style>
     </div>
   );

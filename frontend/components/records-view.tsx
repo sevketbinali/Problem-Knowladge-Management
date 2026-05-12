@@ -3,7 +3,9 @@
 import { useState, useEffect } from "react";
 import { useAuth } from "@/lib/auth-context";
 import { listRecords, deleteRecord, type ProblemRecord } from "@/lib/api";
-import { RefreshCw, AlertCircle, ChevronDown, ChevronUp, Trash2 } from "lucide-react";
+import { RefreshCw, AlertCircle, ChevronDown, ChevronUp, Trash2, Target, Lightbulb } from "lucide-react";
+import ReactMarkdown from "react-markdown";
+import remarkGfm from "remark-gfm";
 
 export default function RecordsView() {
   const { token } = useAuth();
@@ -367,30 +369,28 @@ export default function RecordsView() {
                     <DetailField label="Problem Açıklaması" value={record.problem_description} />
                   )}
                   {record.root_cause && (
-                    <DetailField label="Kök Neden" value={record.root_cause} />
+                    <DetailField label="Kök Neden" value={record.root_cause} useMarkdown />
                   )}
                   {record.lessons_learned && (
                     <div>
-                      <DetailLabel label="Alınan Dersler" />
+                      <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 8 }}>
+                        <Lightbulb size={14} style={{ color: "var(--color-text-muted)" }} />
+                        <DetailLabel label="Alınan Dersler" />
+                      </div>
                       <div
+                        className="markdown-content"
                         style={{
                           marginTop: 8,
-                          padding: "12px 14px",
+                          padding: "16px",
                           background: "var(--color-info-bg)",
                           border: "1px solid rgba(69,170,200,0.15)",
-                          borderRadius: 9,
+                          borderRadius: 12,
+                          fontSize: 13,
+                          color: "var(--color-text-primary)",
+                          lineHeight: 1.7,
                         }}
                       >
-                        <p
-                          style={{
-                            fontSize: 13,
-                            color: "var(--color-text-primary)",
-                            lineHeight: 1.7,
-                            whiteSpace: "pre-wrap",
-                          }}
-                        >
-                          {record.lessons_learned}
-                        </p>
+                        <ReactMarkdown remarkPlugins={[remarkGfm]}>{record.lessons_learned}</ReactMarkdown>
                       </div>
                     </div>
                   )}
@@ -447,7 +447,32 @@ export default function RecordsView() {
         })}
       </div>
 
-      <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
+      <style>{`
+        @keyframes spin { to { transform: rotate(360deg); } }
+        .markdown-content h1, .markdown-content h2, .markdown-content h3 {
+          margin-top: 16px;
+          margin-bottom: 8px;
+          font-weight: 600;
+          color: var(--color-text-primary);
+        }
+        .markdown-content h1 { font-size: 1.3rem; }
+        .markdown-content h2 { font-size: 1.15rem; }
+        .markdown-content h3 { font-size: 1.05rem; }
+        .markdown-content p { margin-bottom: 12px; }
+        .markdown-content ul, .markdown-content ol {
+          margin-bottom: 12px;
+          padding-left: 20px;
+        }
+        .markdown-content li { margin-bottom: 4px; }
+        .markdown-content strong { color: var(--color-text-primary); }
+        .markdown-content code {
+          background: rgba(0,0,0,0.05);
+          padding: 2px 4px;
+          border-radius: 4px;
+          font-family: var(--font-mono);
+          font-size: 0.9em;
+        }
+      `}</style>
     </div>
   );
 }
@@ -468,11 +493,15 @@ function DetailLabel({ label }: { label: string }) {
   );
 }
 
-function DetailField({ label, value }: { label: string; value: string }) {
+function DetailField({ label, value, useMarkdown }: { label: string; value: string; useMarkdown?: boolean }) {
   return (
     <div>
-      <DetailLabel label={label} />
-      <p
+      <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 8 }}>
+        {label === "Kök Neden" && <Target size={14} style={{ color: "var(--color-text-muted)" }} />}
+        <DetailLabel label={label} />
+      </div>
+      <div
+        className={useMarkdown ? "markdown-content" : ""}
         style={{
           marginTop: 6,
           fontSize: 13,
@@ -480,8 +509,12 @@ function DetailField({ label, value }: { label: string; value: string }) {
           lineHeight: 1.6,
         }}
       >
-        {value}
-      </p>
+        {useMarkdown ? (
+          <ReactMarkdown remarkPlugins={[remarkGfm]}>{value}</ReactMarkdown>
+        ) : (
+          <p>{value}</p>
+        )}
+      </div>
     </div>
   );
 }

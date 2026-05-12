@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useAuth } from "@/lib/auth-context";
 import {
   MessageSquarePlus,
@@ -25,32 +25,66 @@ interface FinalizedReport {
   lessons_learned?: string;
 }
 
+interface ActiveSession {
+  id: string;
+  firstPrompt: string;
+  initialProblem: string;
+  similarProblems: SimilarProblem[];
+  methodologyLabel?: string; // To show in the sidebar
+}
+
 export default function Dashboard() {
   const { user, logout } = useAuth();
   const [currentView, setCurrentView] = useState<View>("new");
-  const [sessionId, setSessionId] = useState<string | null>(null);
-  const [firstPrompt, setFirstPrompt] = useState<string>("");
-  const [initialProblem, setInitialProblem] = useState<string>("");
-  const [similarProblems, setSimilarProblems] = useState<SimilarProblem[]>([]);
+  const [sessions, setSessions] = useState<ActiveSession[]>([]);
+  const [activeSessionId, setActiveSessionId] = useState<string | null>(null);
   const [finalizedReport, setFinalizedReport] = useState<FinalizedReport | null>(null);
+  const [notification, setNotification] = useState<{ message: string; type: "info" | "warning" } | null>(null);
+
+  useEffect(() => {
+    if (notification) {
+      const timer = setTimeout(() => setNotification(null), 5000);
+      return () => clearTimeout(timer);
+    }
+  }, [notification]);
 
   function handleSessionCreated(id: string, problems: SimilarProblem[], prompt: string, problemText: string) {
-    setSessionId(id);
-    setFirstPrompt(prompt);
-    setInitialProblem(problemText);
-    setSimilarProblems(problems);
+    if (sessions.length >= 5) {
+      setNotification({ message: "Maksimum 5 oturum sınırına ulaştınız. Lütfen bir oturumu bitirin.", type: "warning" });
+      return;
+    }
+
+    const newSession: ActiveSession = {
+      id,
+      similarProblems: problems,
+      firstPrompt: prompt,
+      initialProblem: problemText,
+    };
+
+    const newSessions = [...sessions, newSession];
+    setSessions(newSessions);
+    setActiveSessionId(id);
     setCurrentView("chat");
+
+    if (newSessions.length === 4) {
+      setNotification({ message: "En fazla 5 oturum açılabilmektedir, 1 oturum daha açabilirsiniz.", type: "info" });
+    }
   }
 
   function handleFinalized(report: FinalizedReport) {
     setFinalizedReport(report);
-    setSessionId(null);
+    // Remove the finalized session from active sessions
+    setSessions(prev => prev.filter(s => s.id !== activeSessionId));
+    setActiveSessionId(null);
     setCurrentView("report");
   }
 
   function handleNewSession() {
-    setSessionId(null);
-    setSimilarProblems([]);
+    if (sessions.length >= 5) {
+      setNotification({ message: "Maksimum 5 oturum sınırına ulaştınız. Yeni bir oturum açmak için mevcut birini tamamlamanız gerekir.", type: "warning" });
+      return;
+    }
+    setActiveSessionId(null);
     setFinalizedReport(null);
     setCurrentView("new");
   }
@@ -197,8 +231,8 @@ export default function Dashboard() {
             );
           })}
 
-          {/* Active session */}
-          {sessionId && (
+          {/* Active sessions list */}
+          {sessions.length > 0 && (
             <>
               <div
                 style={{
@@ -207,40 +241,70 @@ export default function Dashboard() {
                   margin: "8px 0",
                 }}
               />
-              <button
-                onClick={() => setCurrentView("chat")}
+              <p
                 style={{
-                  display: "flex",
-                  alignItems: "center",
-                  gap: 10,
-                  padding: "9px 10px",
-                  borderRadius: currentView === "chat" ? "0 8px 8px 0" : 8,
-                  marginLeft: currentView === "chat" ? -10 : 0,
-                  paddingLeft: currentView === "chat" ? 20 : 10,
-                  fontSize: 13,
-                  fontWeight: currentView === "chat" ? 600 : 400,
-                  color: "var(--color-success)",
-                  background: currentView === "chat" ? "var(--color-success-bg)" : "transparent",
-                  border: "none",
-                  borderLeft: currentView === "chat" ? "2px solid var(--color-success)" : "2px solid transparent",
-                  cursor: "pointer",
-                  width: currentView === "chat" ? "calc(100% + 10px)" : "100%",
-                  textAlign: "left",
+                  fontSize: 9,
+                  color: "var(--color-text-muted)",
+                  letterSpacing: "0.1em",
+                  textTransform: "uppercase",
+                  padding: "4px 10px 8px",
+                  fontWeight: 600,
                 }}
               >
-                <span
-                  style={{
-                    width: 7,
-                    height: 7,
-                    borderRadius: "50%",
-                    background: "var(--color-success)",
-                    boxShadow: "0 0 6px var(--color-success)",
-                    flexShrink: 0,
-                    animation: "pulse-dot 2s ease-in-out infinite",
-                  }}
-                />
-                Aktif Oturum
-              </button>
+                Aktif Oturumlar ({sessions.length}/5)
+              </p>
+              <div style={{ display: "flex", flexDirection: "column", gap: 2 }}>
+                {sessions.map((s) => {
+                  const isActive = activeSessionId === s.id && currentView === "chat";
+                  return (
+                    <button
+                      key={s.id}
+                      onClick={() => {
+                        setActiveSessionId(s.id);
+                        setCurrentView("chat");
+                      }}
+                      style={{
+                        display: "flex",
+                        alignItems: "center",
+                        gap: 10,
+                        padding: "9px 10px",
+                        borderRadius: isActive ? "0 8px 8px 0" : 8,
+                        marginLeft: isActive ? -10 : 0,
+                        paddingLeft: isActive ? 20 : 10,
+                        fontSize: 12,
+                        fontWeight: isActive ? 600 : 400,
+                        color: isActive ? "var(--color-success)" : "var(--color-text-secondary)",
+                        background: isActive ? "var(--color-success-bg)" : "transparent",
+                        border: "none",
+                        borderLeft: isActive ? "2px solid var(--color-success)" : "2px solid transparent",
+                        cursor: "pointer",
+                        transition: "all 0.15s",
+                        width: isActive ? "calc(100% + 10px)" : "100%",
+                        textAlign: "left",
+                      }}
+                    >
+                      <span
+                        style={{
+                          width: 6,
+                          height: 6,
+                          borderRadius: "50%",
+                          background: isActive ? "var(--color-success)" : "var(--color-text-muted)",
+                          boxShadow: isActive ? "0 0 6px var(--color-success)" : "none",
+                          flexShrink: 0,
+                          animation: isActive ? "pulse-dot 2s ease-in-out infinite" : "none",
+                        }}
+                      />
+                      <span style={{ 
+                        overflow: "hidden", 
+                        textOverflow: "ellipsis", 
+                        whiteSpace: "nowrap" 
+                      }}>
+                        {s.initialProblem.slice(0, 20)}...
+                      </span>
+                    </button>
+                  );
+                })}
+              </div>
             </>
           )}
         </nav>
@@ -335,27 +399,76 @@ export default function Dashboard() {
           {currentView === "new" && (
             <NewSession onSessionCreated={handleSessionCreated} />
           )}
-          {currentView === "chat" && sessionId && (
-            <ChatSession
-              sessionId={sessionId}
-              similarProblems={similarProblems}
-              firstPrompt={firstPrompt}
-              initialProblem={initialProblem}
-              onFinalized={handleFinalized}
-            />
-          )}
+          {/* Render all active sessions but only show the current one */}
+          {sessions.map(s => (
+            <div 
+              key={s.id} 
+              style={{ display: (currentView === "chat" && activeSessionId === s.id) ? "block" : "none", height: "100%" }}
+            >
+              <ChatSession
+                sessionId={s.id}
+                similarProblems={s.similarProblems}
+                firstPrompt={s.firstPrompt}
+                initialProblem={s.initialProblem}
+                onFinalized={handleFinalized}
+              />
+            </div>
+          ))}
+
           {currentView === "records" && <RecordsView />}
           {currentView === "search" && <KnowledgeSearch />}
           {currentView === "report" && finalizedReport && (
             <ReportView report={finalizedReport} onNewSession={handleNewSession} />
           )}
         </div>
+
+        {/* Global Notifications */}
+        {notification && (
+          <div
+            style={{
+              position: "fixed",
+              bottom: 24,
+              right: 24,
+              padding: "12px 20px",
+              background: notification.type === "warning" ? "var(--color-danger-bg)" : "var(--color-info-bg)",
+              border: `1px solid ${notification.type === "warning" ? "var(--color-danger)" : "var(--color-accent)"}`,
+              borderRadius: 12,
+              color: notification.type === "warning" ? "var(--color-danger)" : "var(--color-text-primary)",
+              boxShadow: "0 8px 30px rgba(0,0,0,0.15)",
+              display: "flex",
+              alignItems: "center",
+              gap: 12,
+              zIndex: 10000,
+              animation: "slide-in-right 0.3s ease-out",
+            }}
+          >
+            <Activity size={18} />
+            <span style={{ fontSize: 13, fontWeight: 500 }}>{notification.message}</span>
+            <button
+              onClick={() => setNotification(null)}
+              style={{
+                background: "none",
+                border: "none",
+                color: "inherit",
+                cursor: "pointer",
+                padding: 4,
+                opacity: 0.6,
+              }}
+            >
+              <X size={14} />
+            </button>
+          </div>
+        )}
       </main>
 
       <style>{`
         @keyframes pulse-dot {
           0%, 100% { opacity: 1; }
           50% { opacity: 0.4; }
+        }
+        @keyframes slide-in-right {
+          from { transform: translateX(100%); opacity: 0; }
+          to { transform: translateX(0); opacity: 1; }
         }
       `}</style>
     </div>
