@@ -15,8 +15,8 @@ class Settings:
     RATE_LIMIT_PER_MINUTE: int = 10
     GEMINI_API_KEY: str
     GEMINI_MODEL: str = "gemini-3-flash-preview"
-    EMBEDDING_MODEL: str = "models/text-embedding-004"
-    EMBEDDING_DIMENSION: int = 768
+    EMBEDDING_MODEL: str = "models/gemini-embedding-001"
+    EMBEDDING_DIMENSION: int = 3072
     JWT_SECRET: str
     JWT_ALGORITHM: str = "HS256"
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 60
@@ -33,8 +33,8 @@ class Settings:
         self.RATE_LIMIT_PER_MINUTE = int(os.getenv("RATE_LIMIT_PER_MINUTE", "10"))
         self.GEMINI_API_KEY = os.getenv("GEMINI_API_KEY", "")
         self.GEMINI_MODEL = os.getenv("GEMINI_MODEL", "gemini-3-flash-preview")
-        self.EMBEDDING_MODEL = os.getenv("EMBEDDING_MODEL", "text-embedding-004")
-        self.EMBEDDING_DIMENSION = int(os.getenv("EMBEDDING_DIMENSION", "768"))
+        self.EMBEDDING_MODEL = os.getenv("EMBEDDING_MODEL", "models/gemini-embedding-001")
+        self.EMBEDDING_DIMENSION = int(os.getenv("EMBEDDING_DIMENSION", "3072"))
         self.JWT_SECRET = os.getenv("JWT_SECRET", "fallback_secret_for_dev_only")
         self.JWT_ALGORITHM = os.getenv("JWT_ALGORITHM", "HS256")
         self.ACCESS_TOKEN_EXPIRE_MINUTES = int(os.getenv("ACCESS_TOKEN_EXPIRE_MINUTES", "60"))

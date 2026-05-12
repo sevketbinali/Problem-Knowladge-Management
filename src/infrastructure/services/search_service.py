@@ -2,7 +2,7 @@
 import uuid
 from typing import Any, Dict, List, Optional
 
-from src.domain.rag_engine import RAGEngine
+from src.infrastructure.services.rag_engine import RAGEngine
 from src.infrastructure.repositories.postgres_repository import PostgreSQLRepository
 from src.infrastructure.services.redis_service import RedisService
 
@@ -32,7 +32,7 @@ class SearchService:
         Requirement 23.1: Degraded mode
         """
         # Requirement 23.1: Check health
-        if not await self.rag.qdrant.is_healthy():
+        if not await self.rag.repository.is_healthy():
             raise RuntimeError("Search is currently unavailable (Degraded Mode)")
 
         # Create cache key

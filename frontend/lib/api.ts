@@ -29,12 +29,15 @@ export interface SessionResponse {
 }
 
 export interface SimilarProblem {
+  id: string;
   score: number;
   payload: {
     title: string;
     methodology: string;
     root_cause: string;
     resolution_status: string;
+    department?: string;
+    tags?: string[];
   };
 }
 
@@ -45,9 +48,22 @@ export interface ProblemRecord {
   methodology: string;
   root_cause: string;
   lessons_learned: string;
+  department?: string;
+  tags?: string[];
+  corrective_actions?: string[];
   resolution_status: string;
   created_at: string;
   updated_at: string;
+}
+
+export interface ListRecordsParams {
+  q?: string;
+  department?: string;
+  methodology?: string;
+  tag?: string;
+  sort?: "newest" | "oldest";
+  skip?: number;
+  limit?: number;
 }
 
 async function apiRequest<T>(
@@ -122,11 +138,23 @@ export async function stepBack(token: string, sessionId: string) {
   });
 }
 
-export async function finalizeSession(token: string, sessionId: string) {
-  return apiRequest<Record<string, unknown>>(`/sessions/${sessionId}/finalize`, {
+export async function finalizeSession(
+  token: string, 
+  sessionId: string, 
+  payload: { department: string; summary: string; tags: string }
+) {
+  return apiRequest<ProblemRecord>(`/sessions/${sessionId}/finalize`, {
     method: "POST",
     headers: authHeaders(token),
+    body: JSON.stringify(payload),
   });
+}
+
+export async function getSuggestions(token: string, sessionId: string) {
+  return apiRequest<{ department: string; summary: string; tags: string[] }>(
+    `/sessions/${sessionId}/suggestions`,
+    { headers: authHeaders(token) }
+  );
 }
 
 export async function listSessions(token: string) {
@@ -151,8 +179,17 @@ export async function searchKnowledge(
 }
 
 // ─── Records ─────────────────────────────────────────────────────────────────
-export async function listRecords(token: string, skip = 0, limit = 20) {
-  return apiRequest<ProblemRecord[]>(`/records?skip=${skip}&limit=${limit}`, {
+export async function listRecords(token: string, params: ListRecordsParams = {}) {
+  const queryParams = new URLSearchParams();
+  if (params.q) queryParams.set("q", params.q);
+  if (params.department) queryParams.set("department", params.department);
+  if (params.methodology) queryParams.set("methodology", params.methodology);
+  if (params.tag) queryParams.set("tag", params.tag);
+  if (params.sort) queryParams.set("sort", params.sort);
+  queryParams.set("skip", (params.skip || 0).toString());
+  queryParams.set("limit", (params.limit || 20).toString());
+
+  return apiRequest<ProblemRecord[]>(`/records?${queryParams}`, {
     headers: authHeaders(token),
   });
 }

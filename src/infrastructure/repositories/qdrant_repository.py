@@ -49,7 +49,7 @@ class QdrantRepository:
             ]
         )
 
-    async def search_similar(self, vector: List[float], limit: int = 10, score_threshold: float = 0.5, filters: Optional[Dict[str, Any]] = None) -> List[Dict[str, Any]]:
+    async def search_similar(self, vector: List[float], limit: int = 10, score_threshold: float = 0.35, filters: Optional[Dict[str, Any]] = None) -> List[Dict[str, Any]]:
         """Search for similar records in Qdrant."""
         # Convert filters to Qdrant format if provided
         query_filter = None
@@ -57,7 +57,7 @@ class QdrantRepository:
             # Basic implementation of filters, could be expanded
             must = []
             for key, value in filters.items():
-                must.append(models.FieldCondition(key=f"metadata.{key}", match=models.MatchValue(value=value)))
+                must.append(models.FieldCondition(key=key, match=models.MatchValue(value=value)))
             query_filter = models.Filter(must=must)
 
         results = await self.client.search(

@@ -261,6 +261,24 @@ export default function RecordsView() {
                   {record.methodology || "—"}
                 </span>
 
+                {/* Department badge */}
+                {record.department && (
+                  <span
+                    style={{
+                      fontSize: 10,
+                      fontWeight: 700,
+                      color: "var(--color-accent)",
+                      background: "rgba(223,128,80,0.08)",
+                      padding: "4px 10px",
+                      borderRadius: 99,
+                      border: "1px solid rgba(223,128,80,0.15)",
+                      flexShrink: 0,
+                    }}
+                  >
+                    {record.department}
+                  </span>
+                )}
+
                 <div style={{ flex: 1, minWidth: 0 }}>
                   <p
                     style={{
@@ -290,6 +308,27 @@ export default function RecordsView() {
                         })
                       : "—"}
                   </p>
+                  {/* Tags Row */}
+                  {record.tags && record.tags.length > 0 && (
+                    <div style={{ display: "flex", gap: 6, marginTop: 6, flexWrap: "wrap" }}>
+                      {record.tags.map((tag) => (
+                        <span
+                          key={tag}
+                          style={{
+                            fontSize: 10,
+                            fontWeight: 500,
+                            color: "var(--color-text-secondary)",
+                            background: "var(--color-surface-hover)",
+                            padding: "2px 8px",
+                            borderRadius: 6,
+                            border: "1px solid var(--color-border)",
+                          }}
+                        >
+                          #{tag}
+                        </span>
+                      ))}
+                    </div>
+                  )}
                 </div>
 
                 <span

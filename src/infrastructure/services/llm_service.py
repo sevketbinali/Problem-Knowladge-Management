@@ -1,5 +1,6 @@
 """Service for interacting with Google Gemini LLM."""
 import asyncio
+import json
 from typing import List, Optional, Dict, Any
 
 from google import genai
@@ -27,6 +28,32 @@ class LLMService:
             # Requirement 14.1: Fallback strategy
             print(f"LLM Error: {str(e)}")
             return ""
+
+    async def _generate_json(self, prompt: str, timeout: int = 15) -> Dict[str, Any]:
+        """Helper to generate and parse JSON content."""
+        try:
+            from google.genai import types
+            response = await asyncio.to_thread(
+                self.client.models.generate_content,
+                model=self.model,
+                contents=prompt,
+                config=types.GenerateContentConfig(
+                    response_mime_type="application/json"
+                )
+            )
+            return json.loads(response.text)
+        except Exception as e:
+            print(f"LLM JSON Error: {str(e)}")
+            # Attempt to find JSON in text as fallback
+            text = await self._generate(prompt, timeout)
+            try:
+                start = text.find("{")
+                end = text.rfind("}") + 1
+                if start != -1 and end != -1:
+                    return json.loads(text[start:end])
+            except:
+                pass
+            return {}
 
     async def generate_clarification(self, problem_description: str) -> str:
         """Generate a follow-up question to clarify the problem description."""
