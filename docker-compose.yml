@@ -27,23 +27,23 @@ services:
       - pkm_network
     restart: unless-stopped
 
-# Streamlit frontend disabled as per user request to focus on Next.js
-#  frontend:
-#    build:
-#      context: .
-#      dockerfile: Dockerfile.frontend
-#    container_name: pkm_frontend
-#    ports:
-#      - "8501:8501"
-#    environment:
-#      - API_URL=http://api:8000/api/v1
-#    volumes:
-#      - ./src:/app/src
-#    depends_on:
-#      - api
-#    networks:
-#      - pkm_network
-#    restart: unless-stopped
+  # Streamlit frontend disabled as per user request to focus on Next.js
+  #  frontend:
+  #    build:
+  #      context: .
+  #      dockerfile: Dockerfile.frontend
+  #    container_name: pkm_frontend
+  #    ports:
+  #      - "8501:8501"
+  #    environment:
+  #      - API_URL=http://api:8000/api/v1
+  #    volumes:
+  #      - ./src:/app/src
+  #    depends_on:
+  #      - api
+  #    networks:
+  #      - pkm_network
+  #    restart: unless-stopped
 
   frontend-next:
     build:
@@ -76,7 +76,7 @@ services:
     volumes:
       - pgdata:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U pkm_user -d pkm_db"]
+      test: [ "CMD-SHELL", "pg_isready -U pkm_user -d pkm_db" ]
       interval: 5s
       timeout: 5s
       retries: 5
@@ -104,7 +104,7 @@ services:
     volumes:
       - redis_data:/data
     healthcheck:
-      test: ["CMD", "redis-cli", "ping"]
+      test: [ "CMD", "redis-cli", "ping" ]
       interval: 5s
       timeout: 5s
       retries: 5

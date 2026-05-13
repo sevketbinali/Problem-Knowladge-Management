@@ -35,15 +35,15 @@ JWT tabanlı yetkilendirme sistemi ile güvenli giriş. Kullanıcı bazlı kayı
 ### 💬 2. İnteraktif Analiz (Session & Methodology)
 8D, Ishikawa ve 5-Why gibi karmaşık metodolojiler artık birer yük değil. 
 - **AI Rehberliği:** Yapay zeka, seçilen metoda göre dinamik sorular sorar, kullanıcıyı yönlendirir ve tutarsız cevapları (Döngüsel Mantık Tespiti) fark eder.
-- **Anlık Öneriler:** Analiz sırasında sağ panelde, mevcut vaka ile **%65+ benzerlik** gösteren geçmiş kayıtlar anlık olarak listelenir.
+- **Benzer Problem Önerisi:** Analiz sırasında, girilen bilgilere istinaden ilişkili olabilecek ve daha önce yaşanmış problemler anlık olarak gösterilir.
 
 ### 🧠 3. Bilgi Bankası & Semantic Search
 Klasik anahtar kelime aramasının ötesine geçin.
-- **Anlamsal Hafıza:** Qdrant Vektör Veritabanı sayesinde, "Isınma problemi" yazdığınızda sistem "Sıcaklık artışı" veya "Termal arıza" kayıtlarını da anlamsal ilişkisine göre bulur.
+- **Anlamsal Hafıza:** Qdrant Vektör Veritabanı sayesinde, anlamsal olarak benzer geçmiş problemler benzerlik oranlarına göre listelenir.
 - **Filtreleme:** Departman, metodoloji veya etiket bazlı gelişmiş daraltma seçenekleri.
 
-### 📊 4. Birleşik Kayıt Görselleştirme (Unified Visualization)
-Tüm problem kayıtları; kök neden analizi, aksiyon planları ve alınan dersler ile hiyerarşik ve okunabilir bir "Expand/Collapse" yapısında sunulur.
+### 📊 4. Problem Kayıtları Yönetimi (Unified Visualization)
+Tüm problem kayıtları; açıklamalar, kök neden analizleri ve alınan dersler ile hiyerarşik ve okunabilir bir yapıda sunulur. Geçmişteki tüm vakaların durum takibi ve yönetimi tek bir merkezden yapılır.
 
 ---
 
