@@ -99,7 +99,3 @@ Sistem ayağa kalktığında erişim adresleri:
 - **DevOps:** Docker, Docker Compose
 
 ---
-
-<div align="center">
-  <sub>Built with ❤️ for Problem Solving Excellence</sub>
-</div>
