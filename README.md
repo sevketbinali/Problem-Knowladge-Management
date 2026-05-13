@@ -3,108 +3,88 @@
 <img src="https://raw.githubusercontent.com/sevketbinali/Problem-Knowladge-Management/main/docs/assets/pkm_banner.png" alt="PKM Banner" width="100%" />
 
 # 🧠 Problem Knowledge Management (PKM)
+### *Kurumsal Hafızayı Yapay Zeka ile Akıllı Bir Varlığa Dönüştürün*
 
 [![Next.js](https://img.shields.io/badge/Next.js-000000?style=for-the-badge&logo=nextdotjs&logoColor=white)](https://nextjs.org/)
 [![FastAPI](https://img.shields.io/badge/FastAPI-005571?style=for-the-badge&logo=fastapi)](https://fastapi.tiangolo.com/)
-[![Docker](https://img.shields.io/badge/docker-%230db7ed.svg?style=for-the-badge&logo=docker&logoColor=white)](https://www.docker.com/)
-[![PostgreSQL](https://img.shields.io/badge/PostgreSQL-316192?style=for-the-badge&logo=postgresql&logoColor=white)](https://www.postgresql.org/)
 [![Qdrant](https://img.shields.io/badge/Qdrant-f33?style=for-the-badge&logo=qdrant&logoColor=white)](https://qdrant.tech/)
-
-**Kurumsal Hafızanızı Yapay Zeka ile Güçlendirin.**  
-*Problemleri sadece çözmekle kalmayın, onları birer öğrenme fırsatına dönüştürün.*
-
-[Kurulum Kılavuzu](#-hızlı-kurulum) • [Teknik Mimari](#-sistem-mimarisi) • [Özellikler](#-temel-özellikler)
+[![Gemini AI](https://img.shields.io/badge/Google_Gemini-8E75B2?style=for-the-badge&logo=googlegemini&logoColor=white)](https://ai.google.dev/)
 
 </div>
 
 ---
 
-## ✨ Temel Özellikler
+## 📌 Problem Tanımı ve Değer Önerisi
 
-PKM, karmaşık problemleri standart metodolojilerle çözmek ve bu çözümleri akıllı bir veritabanında saklamak için tasarlanmış uçtan uca bir platformdur.
+Endüstriyel ve kurumsal süreçlerde problemler kaçınılmazdır. Ancak asıl problem, **bilgi kaybıdır**. Çözülen sorunların detayları, kök nedenleri ve alınan dersler genellikle kişisel notlarda veya dağınık dosyalarda kaybolur.
 
-*   **🛠️ AI Destekli Metodolojiler:** 5-Why, Ishikawa (Balık Kılçığı) ve 8D süreçlerini yapay zeka rehberliğinde yönetin.
-*   **🤖 Akıllı Rehberlik:** Her adımda AI tarafından üretilen dinamik sorular ve netleştirme adımları.
-*   **🔍 Semantik Arama (RAG):** Qdrant vektör veritabanı sayesinde, anahtar kelime eşleşmesi ötesinde, *anlamsal* olarak benzer geçmiş problemleri anında bulun.
-*   **🎨 Premium Dark UI:** Amber ve Terracotta vurgularıyla zenginleştirilmiş, kullanıcı dostu ve profesyonel "Carbon" koyu tema.
-*   **📊 Unified Record Visualization:** Tüm ekranlarda (Kayıtlar, Bilgi Bankası, Öneriler) tutarlı ve detaylı veri gösterimi.
-*   **🎓 Alınan Dersler (Lessons Learned):** Her çözüm sonunda AI tarafından sentezlenen kurumsal öğrenme çıktıları.
+**PKM (Problem Knowledge Management)**, bu bilgi kaybını önlemek için tasarlandı. Standart problem çözme metodolojilerini (8D, Ishikawa, 5-Why) yapay zeka ile birleştirerek;
+- Problemleri yapılandırılmış bir şekilde analiz eder.
+- Geçmişteki benzer vakaları **Semantik Arama (RAG)** ile anında hatırlar.
+- Çözüm süreçlerinden otomatik olarak "Kurumsal Öğrenme" çıktıları üretir.
 
 ---
 
-## 📸 Ekran Görüntüleri
+## 🛠️ Temel Arayüzler ve Kullanıcı Deneyimi
 
-### 1. Akıllı Bilgi Bankası (Semantic Search)
-Vektör tabanlı arama ile benzer problemleri benzerlik oranlarına göre listeleyin.
-<img src="https://raw.githubusercontent.com/sevketbinali/Problem-Knowladge-Management/main/docs/assets/knowledge_search.png" alt="Knowledge Search" width="100%" style="border-radius: 12px; border: 1px solid #333;" />
+PKM, karmaşık analiz süreçlerini basitleştiren, yüksek estetikli (Premium Dark Theme) bir arayüz sunar.
 
-### 2. Detaylı Kayıt Görünümü
-Problem açıklaması, kök neden analizi ve alınan derslerin hiyerarşik gösterimi.
-<img src="https://raw.githubusercontent.com/sevketbinali/Problem-Knowladge-Management/main/docs/assets/record_detail.png" alt="Record Detail" width="100%" style="border-radius: 12px; border: 1px solid #333;" />
+### 🔐 1. Güvenli Erişim (Login UI)
+JWT tabanlı yetkilendirme sistemi ile güvenli giriş. Kullanıcı bazlı kayıt takibi ve yetkilendirme hiyerarşisi.
 
-### 3. Problem Kayıtları Yönetimi
-Geçmişteki tüm vakaların durum takibi ve yönetimi.
-<img src="https://raw.githubusercontent.com/sevketbinali/Problem-Knowladge-Management/main/docs/assets/records_list.png" alt="Records List" width="100%" style="border-radius: 12px; border: 1px solid #333;" />
+### 💬 2. İnteraktif Analiz (Session & Methodology)
+8D, Ishikawa ve 5-Why gibi karmaşık metodolojiler artık birer yük değil. 
+- **AI Rehberliği:** Yapay zeka, seçilen metoda göre dinamik sorular sorar, kullanıcıyı yönlendirir ve tutarsız cevapları (Döngüsel Mantık Tespiti) fark eder.
+- **Anlık Öneriler:** Analiz sırasında sağ panelde, mevcut vaka ile **%65+ benzerlik** gösteren geçmiş kayıtlar anlık olarak listelenir.
 
----
+### 🧠 3. Bilgi Bankası & Semantic Search
+Klasik anahtar kelime aramasının ötesine geçin.
+- **Anlamsal Hafıza:** Qdrant Vektör Veritabanı sayesinde, "Isınma problemi" yazdığınızda sistem "Sıcaklık artışı" veya "Termal arıza" kayıtlarını da anlamsal ilişkisine göre bulur.
+- **Filtreleme:** Departman, metodoloji veya etiket bazlı gelişmiş daraltma seçenekleri.
 
-## 🏗️ Sistem Mimarisi
-
-PKM, yüksek performanslı ve modern bir teknoloji yığını üzerine inşa edilmiştir:
-
-```mermaid
-graph TD
-    User([Kullanıcı / Next.js UI]) <--> API[FastAPI Backend]
-    API <--> LLM[Google Gemini 3 Flash]
-    API <--> RAG[Qdrant Vector DB]
-    API <--> DB[(PostgreSQL)]
-    API <--> Cache[(Redis)]
-    
-    subgraph "Infrastructure (Docker)"
-        DB
-        RAG
-        Cache
-    end
-```
+### 📊 4. Birleşik Kayıt Görselleştirme (Unified Visualization)
+Tüm problem kayıtları; kök neden analizi, aksiyon planları ve alınan dersler ile hiyerarşik ve okunabilir bir "Expand/Collapse" yapısında sunulur.
 
 ---
 
-## 🚀 Hızlı Kurulum
+## ⚙️ Teknik Mimari ve AI Entegrasyonu
 
-### 1. Hazırlık
-`.env.example` dosyasını `.env` olarak kopyalayın ve gerekli anahtarları ekleyin:
-```bash
-cp .env.example .env
-```
+Proje, modern bir mikroservis ve RAG (Retrieval-Augmented Generation) mimarisi üzerine kurulmuştur.
 
-### 2. Docker ile Çalıştır
-Tüm sistemi (Backend, Frontend, Veritabanları) tek bir komutla ayağa kaldırın:
+- **Backend:** FastAPI (Python) - Yüksek performanslı asenkron yapı.
+- **Frontend:** Next.js 14 - Hızlı, SEO dostu ve reaktif arayüz.
+- **AI Engine:** Google Gemini 1.5 Flash & Text-Embedding-004.
+- **Vector DB:** Qdrant - Milyonlarca kayıt arasında milisaniyeler içinde benzerlik araması.
+- **Relational DB:** PostgreSQL - Yapılandırılmış verilerin ve kullanıcı ilişkilerinin yönetimi.
+- **Caching:** Redis - Arama sonuçlarının ve oturum verilerinin hızlandırılması.
+
+---
+
+## 🚀 Hızlı Başlangıç (Docker)
+
+Sistemi tüm bileşenleriyle ayağa kaldırmak için:
+
+1.  `.env.example` dosyasını `.env` olarak kopyalayın ve Gemini API anahtarınızı girin.
+2.  Terminalde aşağıdaki komutu çalıştırın:
+
 ```bash
 docker-compose up -d --build
 ```
 
-Sistem ayağa kalktığında erişim adresleri:
-- **Kullanıcı Arayüzü:** [http://localhost:3000](http://localhost:3000)
-- **API (FastAPI):** [http://localhost:8000](http://localhost:8000)
-- **API Dökümantasyonu:** [http://localhost:8000/docs](http://localhost:8000/docs)
-
-### 🔑 Giriş Bilgileri (Varsayılan Admin)
-*   **E-mail:** `admin@pkm.local`
-*   **Şifre:** `Admin123!`
+**Erişim Noktaları:**
+- **Frontend:** `http://localhost:3000`
+- **Backend API:** `http://localhost:8000`
+- **API Dökümantasyonu:** `http://localhost:8000/docs`
 
 ---
 
-## 🛠️ Teknoloji Yığını
+## 🌟 Neden PKM? (Yenilikçilik)
 
-- **Frontend:** Next.js 14, React, Lucide Icons, Vanilla CSS
-- **Backend:** FastAPI (Python 3.11+), SQLAlchemy
-- **Yapay Zeka:** Google Gemini 1.5 Flash (LLM), Text-Embedding-004 (Vektörizasyon)
-- **Veritabanı:** PostgreSQL (İlişkisel Veriler), Qdrant (Vektör Verileri)
-- **Önbellek:** Redis
-- **DevOps:** Docker, Docker Compose
+PKM, sadece bir veri giriş formu değildir. **"Semantik Kurumsal Hafıza"** kavramını hayata geçirir. 
+- **Otomatik Sentez:** Analiz bitiminde AI, tüm süreci özetleyerek "Alınan Dersler" (Lessons Learned) bölümünü otomatik yazar.
+- **Hata Önleme:** AI, analiz sırasında verilen cevapların kalitesini denetler, yetersiz cevaplarda kullanıcıyı daha derin analiz yapmaya zorlar.
 
 ---
-
 <div align="center">
-  <sub>Built with ❤️ for Problem Solving Excellence</sub>
+  <sub>Problem Çözme Mükemmeliyeti İçin Tasarlandı • 2026</sub>
 </div>
