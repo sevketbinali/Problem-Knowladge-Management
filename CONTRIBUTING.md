@@ -41,4 +41,4 @@ Proje, tam izole bir geliştirme ortamı için Docker kullanır.
 4. Kod incelemesinden sonra `develop` dalına merge edilecektir.
 
 ---
-<sub>Sistem hakkında sorularınız için [admin@pkm.local](mailto:admin@pkm.local) adresine ulaşabilirsiniz.</sub>
+<sub>Sistem hakkında sorularınız için [sevketbinali@gmail.com](mailto:sevketbinali@gmail.com) adresine ulaşabilirsiniz.</sub>
