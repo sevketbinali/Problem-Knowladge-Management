@@ -41,6 +41,7 @@ Yeni bir problem kayıdı oluştururken, girilen bilgilere istinaden, ilişkili 
 
 ### 3. Problem Kayıtları Yönetimi
 Problem açıklaması, kök neden analizi ve alınan derslerin hiyerarşik gösterimi ve geçmişteki tüm vakaların durum takibi ve yönetimi.
+
 ---
 
 ## 🏗️ Sistem Mimarisi
