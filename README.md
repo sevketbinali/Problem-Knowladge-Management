@@ -72,12 +72,56 @@ Analiz sonunda sistem, tüm süreci sentezleyerek otomatik olarak "Alınan Dersl
 
 ## 🏗️ Teknik Mimari
 
+Projenin veri akışı ve bileşenler arası iletişimi aşağıda görselleştirilmiştir:
+
+```mermaid
+graph TD
+    subgraph "Frontend Layer (Next.js)"
+        UI[User Interface]
+        AuthCtx[Auth Context]
+        APICli[API Client]
+    end
+
+    subgraph "Backend Layer (FastAPI)"
+        API[REST Endpoints]
+        MthSvc[Methodology Service]
+        SearchSvc[Search & RAG Service]
+        AuthSvc[JWT Auth Service]
+    end
+
+    subgraph "AI & Vector Layer"
+        LLM[Google Gemini 1.5 Flash]
+        Emb[Text-Embedding-004]
+        Qdrant[(Qdrant Vector DB)]
+    end
+
+    subgraph "Data Layer"
+        Postgres[(PostgreSQL)]
+        Redis[(Redis Cache)]
+    end
+
+    UI <--> APICli
+    APICli <--> API
+    API <--> AuthSvc
+    API <--> MthSvc
+    API <--> SearchSvc
+
+    MthSvc <--> LLM
+    SearchSvc <--> Emb
+    SearchSvc <--> Qdrant
+    
+    AuthSvc <--> Postgres
+    API <--> Postgres
+    SearchSvc <--> Redis
+```
+
+### Teknoloji Yığını
 - **Frontend:** Next.js 14, TypeScript, Vanilla CSS
 - **Backend:** FastAPI (Python), SQLAlchemy
 - **Yapay Zeka:** Google Gemini 1.5 Flash (LLM), Text-Embedding-004
-- **Vektör DB:** Qdrant
-- **İlişkisel DB:** PostgreSQL
-- **Önbellek:** Redis
+- **Vektör DB:** Qdrant (Hızlı anlamsal arama)
+- **İlişkisel DB:** PostgreSQL (Kayıt yönetimi)
+- **Önbellek:** Redis (Hızlı arama sonuçları)
 
 ---
 <div align="center">
