@@ -1,8 +1,7 @@
 <div align="center">
 
-<img src="https://raw.githubusercontent.com/sevketbinali/Problem-Knowladge-Management/main/docs/assets/pkm_banner.png" alt="PKM Banner" width="100%" />
 
-# 🧠 Problem Knowledge Management (PKM)
+# Problem Knowledge Management (PKM)
 
 [![Next.js](https://img.shields.io/badge/Next.js-000000?style=for-the-badge&logo=nextdotjs&logoColor=white)](https://nextjs.org/)
 [![FastAPI](https://img.shields.io/badge/FastAPI-005571?style=for-the-badge&logo=fastapi)](https://fastapi.tiangolo.com/)
@@ -36,16 +35,12 @@ PKM, karmaşık problemleri standart metodolojilerle çözmek ve bu çözümleri
 
 ### 1. Akıllı Bilgi Bankası (Semantic Search)
 Vektör tabanlı arama ile benzer problemleri benzerlik oranlarına göre listeleyin.
-<img src="https://raw.githubusercontent.com/sevketbinali/Problem-Knowladge-Management/main/docs/assets/knowledge_search.png" alt="Knowledge Search" width="100%" style="border-radius: 12px; border: 1px solid #333;" />
 
-### 2. Detaylı Kayıt Görünümü
-Problem açıklaması, kök neden analizi ve alınan derslerin hiyerarşik gösterimi.
-<img src="https://raw.githubusercontent.com/sevketbinali/Problem-Knowladge-Management/main/docs/assets/record_detail.png" alt="Record Detail" width="100%" style="border-radius: 12px; border: 1px solid #333;" />
+### 2. Benzer Problem Önerisi
+Yeni bir problem kayıdı oluştururken, girilen bilgilere istinaden, ilişkili olabilecek ve daha önce yaşanmış problemlerin gösterimi.
 
 ### 3. Problem Kayıtları Yönetimi
-Geçmişteki tüm vakaların durum takibi ve yönetimi.
-<img src="https://raw.githubusercontent.com/sevketbinali/Problem-Knowladge-Management/main/docs/assets/records_list.png" alt="Records List" width="100%" style="border-radius: 12px; border: 1px solid #333;" />
-
+Problem açıklaması, kök neden analizi ve alınan derslerin hiyerarşik gösterimi ve geçmişteki tüm vakaların durum takibi ve yönetimi.
 ---
 
 ## 🏗️ Sistem Mimarisi
