@@ -59,12 +59,15 @@ Analiz sonunda sistem, tüm süreci sentezleyerek otomatik olarak "Alınan Dersl
 
 ## 📸 Ekran Görüntüleri
 
+
+
 | Modül | Açıklama ve Görsel |
 | :--- | :--- |
-| **Kullanıcı Girişi** | Güvenli JWT tabanlı erişim kontrolü.<br /><br /><img src="https://github.com/user-attachments/assets/3320a260-3cb3-4381-af24-cf070ea6dd63" width="100%" style="border-radius:8px;" /> |
-| **Problem Analizi** | AI destekli adım adım metodoloji yönetimi ve dinamik soru akışı.<br /><br /><img src="https://raw.githubusercontent.com/sevketbinali/Problem-Knowladge-Management/main/docs/assets/problem_analysis.png" width="100%" style="border-radius:8px;" /> |
-| **Bilgi Bankası** | Vektör tabanlı anlamsal arama, benzerlik skorları ve gelişmiş filtreleme.<br /><br /><img src="https://raw.githubusercontent.com/sevketbinali/Problem-Knowladge-Management/main/docs/assets/knowledge_search.png" width="100%" style="border-radius:8px;" /> |
-| **Kayıt Detayı** | Hiyerarşik problem dökümü, kök neden analizi ve AI tarafından sentezlenen alınan dersler.<br /><br /><img src="https://raw.githubusercontent.com/sevketbinali/Problem-Knowladge-Management/main/docs/assets/record_detail.png" width="100%" style="border-radius:8px;" /> |
+| **Kullanıcı Girişi** |<img width="1919" height="1079" alt="image" src="https://github.com/user-attachments/assets/31b57793-8926-4aa1-9954-63f9406d0e44" /> Güvenli JWT tabanlı erişim kontrolü.|
+| **Problem Analizi** | <img width="1919" height="1079" alt="image" src="https://github.com/user-attachments/assets/45045f09-e5a1-45e5-938d-0e58c7362095" /> AI destekli adım adım metodoloji yönetimi ve dinamik soru akışı.|
+| **Kayıt Detayı** | <img width="1919" height="1079" alt="image" src="https://github.com/user-attachments/assets/498cf66b-e72a-4272-97d7-7e8dc0d4b1ff" /> AI’nin problemi analiz etmesi ve geçmişteki benzer sorunları önermesi.|
+| **Bilgi Bankası** | <img width="1919" height="1079" alt="image" src="https://github.com/user-attachments/assets/8ab3ad9f-c7ff-431a-b0d6-26c4e0b2dd3d" /> Vektör tabanlı anlamsal arama, benzerlik skorları ve gelişmiş filtreleme. |
+
 
 ---
 
