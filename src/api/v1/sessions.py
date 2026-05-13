@@ -22,7 +22,7 @@ def get_session_service(
     return SessionService(repo, MethodologyEngine(), LLMService(), rag)
 
 
-@router.post("/", response_model=APIResponse[SessionResponse])
+@router.post("", response_model=APIResponse[SessionResponse])
 async def start_session(
     data: SessionStart,
     current_user: User = Depends(get_current_active_user),
@@ -40,7 +40,7 @@ async def start_session(
         raise HTTPException(status_code=400, detail=str(e))
 
 
-@router.get("/", response_model=APIResponse[List[SessionResponse]])
+@router.get("", response_model=APIResponse[List[SessionResponse]])
 async def list_sessions(
     current_user: User = Depends(get_current_active_user),
     repo: PostgreSQLRepository = Depends(get_repository)

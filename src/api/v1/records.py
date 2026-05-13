@@ -9,7 +9,7 @@ from src.infrastructure.repositories.postgres_repository import PostgreSQLReposi
 
 router = APIRouter(prefix="/records", tags=["Problem Records"])
 
-@router.get("/", response_model=APIResponse[List[dict]])
+@router.get("", response_model=APIResponse[List[dict]])
 async def list_records(
     q: str = None,
     department: str = None,

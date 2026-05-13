@@ -9,6 +9,7 @@ import {
   Activity,
   LogOut,
   CheckCircle,
+  X,
 } from "lucide-react";
 import NewSession from "@/components/new-session";
 import ChatSession from "@/components/chat-session";

@@ -72,3 +72,16 @@ app.include_router(analysis_router, prefix="/api/v1")
 app.include_router(knowledge_router, prefix="/api/v1")
 app.include_router(records_router, prefix="/api/v1")
 app.include_router(health_router, prefix="/api/v1")
+
+@app.get("/")
+async def root():
+    return {
+        "status": "success",
+        "data": {
+            "message": "Welcome to the Problem Knowledge Management API",
+            "docs": "/docs",
+            "health": "/api/v1/health"
+        },
+        "error": None,
+        "message": None
+    }
