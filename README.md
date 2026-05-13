@@ -59,14 +59,12 @@ Analiz sonunda sistem, tüm süreci sentezleyerek otomatik olarak "Alınan Dersl
 
 ## 📸 Ekran Görüntüleri
 
-| Modül | Açıklama |
+| Modül | Açıklama ve Görsel |
 | :--- | :--- |
-| **Kullanıcı Girişi** | Güvenli JWT tabanlı erişim kontrolü. |
-| **Problem Analizi** | AI destekli adım adım metodoloji yönetimi. |
-| **Bilgi Bankası** | Vektör tabanlı anlamsal arama ve filtreleme. |
-| **Kayıt Detayı** | Hiyerarşik problem dökümü ve çözüm analizi. |
-
-*(İlgili görseller `docs/assets` dizininden güncellenebilir)*
+| **Kullanıcı Girişi** | Güvenli JWT tabanlı erişim kontrolü.<br /><br /><img src="https://github.com/user-attachments/assets/3320a260-3cb3-4381-af24-cf070ea6dd63" width="100%" style="border-radius:8px;" /> |
+| **Problem Analizi** | AI destekli adım adım metodoloji yönetimi ve dinamik soru akışı.<br /><br /><img src="https://raw.githubusercontent.com/sevketbinali/Problem-Knowladge-Management/main/docs/assets/problem_analysis.png" width="100%" style="border-radius:8px;" /> |
+| **Bilgi Bankası** | Vektör tabanlı anlamsal arama, benzerlik skorları ve gelişmiş filtreleme.<br /><br /><img src="https://raw.githubusercontent.com/sevketbinali/Problem-Knowladge-Management/main/docs/assets/knowledge_search.png" width="100%" style="border-radius:8px;" /> |
+| **Kayıt Detayı** | Hiyerarşik problem dökümü, kök neden analizi ve AI tarafından sentezlenen alınan dersler.<br /><br /><img src="https://raw.githubusercontent.com/sevketbinali/Problem-Knowladge-Management/main/docs/assets/record_detail.png" width="100%" style="border-radius:8px;" /> |
 
 ---
 
